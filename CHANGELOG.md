@@ -4,6 +4,58 @@ Toutes les modifications notables du projet sont documentées dans ce fichier.
 
 ---
 
+## [1.2.0] - 2025-11-15 - Scénarios d'Automatisation 🚀
+
+### ✨ Nouveautés Majeures
+- **3 Scénarios d'Implémentation Détaillés**
+  - Scénario 1 : Baseline Manuel (référence)
+  - Scénario 2 : Automatisation Classique (RPA + IA Déterministe)
+  - Scénario 3 : Automatisation Complète (+ IA Agentique LLM)
+  
+- **Pour Chaque Scénario**
+  - Stack technologique complet avec outils recommandés
+  - Pourcentage de couverture d'automatisation
+  - Estimation d'économies (%)
+  - Timeline d'implémentation
+  - Investissement requis (€, €€, €€€)
+  - Liste détaillée des bénéfices
+  - Identification des risques et contraintes
+  - Étapes du processus concernées
+
+- **Tableau Comparatif Interactif**
+  - Vue côte-à-côte des 3 scénarios
+  - Métriques clés : Couverture, Économies, Investissement, Timeline
+  - Recommandation personnalisée selon le processus analysé
+
+- **Analyse ROI**
+  - Calculs automatiques d'économies potentielles
+  - Comparaison des investissements
+  - Recommandations adaptées au contexte
+
+### 📚 Documentation
+- Ajout de `SCENARIOS.md` - Guide complet des scénarios (10KB)
+  - Détails techniques de chaque scénario
+  - Exemples de calcul ROI concrets
+  - Matrice de décision
+  - Bonnes pratiques d'implémentation
+  - Estimation budgétaire détaillée
+
+### 🎨 Interface Utilisateur
+- Nouvelle section "Scénarios d'Automatisation avec IA" en fin d'analyse
+- Cards visuelles avec code couleur par scénario
+- Grilles de métriques clés
+- Listes de technologies avec icônes
+- Sections bénéfices/risques structurées
+- Tableau comparatif responsive
+
+### 🔧 Améliorations Techniques
+- Calculs dynamiques de couverture par scénario
+- Regroupement intelligent des étapes par niveau
+- Génération automatique de recommandations contextuelles
+- Interface responsive et accessible
+
+---
+
 ## [1.1.0] - 2025-11-15 - Visualisation Interactive 🎨
 
 ### ✨ Nouveautés
