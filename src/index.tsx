@@ -224,12 +224,24 @@ app.get('/', (c) => {
                 </div>
 
                 <!-- Recommendations -->
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg shadow-md p-6">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg shadow-md p-6 mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">
                         <i class="fas fa-star text-yellow-500 mr-2"></i>
                         Recommandations Stratégiques
                     </h2>
                     <div id="recommendations"></div>
+                </div>
+
+                <!-- Automation Scenarios -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-rocket text-orange-500 mr-2"></i>
+                        Scénarios d'Automatisation avec IA
+                    </h2>
+                    <p class="text-gray-600 mb-6">
+                        Découvrez comment implémenter l'automatisation de votre processus selon 3 scénarios progressifs
+                    </p>
+                    <div id="automationScenarios"></div>
                 </div>
             </div>
 

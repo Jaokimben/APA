@@ -81,6 +81,9 @@ function displayResults(data) {
     
     // Recommendations
     displayRecommendations(data.recommendations);
+    
+    // Automation Scenarios
+    displayAutomationScenarios(data);
 }
 
 function displayProcessOverview(data) {
@@ -577,6 +580,350 @@ function generateSwimlanesDiagram(data) {
     diagram += '    style End fill:#D1FAE5,stroke:#10B981,stroke-width:3px\n';
     
     return diagram;
+}
+
+function displayAutomationScenarios(data) {
+    const container = document.getElementById('automationScenarios');
+    const steps = data.steps;
+    const stats = data.statistics;
+    
+    // Calculate automation metrics
+    const totalSteps = stats.total;
+    const ruleBasedSteps = steps.filter(s => s.automationType === 'rule-based');
+    const deterministicSteps = steps.filter(s => s.automationType === 'deterministic-ai');
+    const agenticSteps = steps.filter(s => s.automationType === 'agentic-ai');
+    const manualSteps = steps.filter(s => s.automationType === 'manual');
+    
+    // Scenario 1: Baseline (Manual)
+    const scenario1Coverage = 0;
+    const scenario1Cost = 100; // Base cost reference
+    const scenario1Time = 100; // Base time reference
+    
+    // Scenario 2: Rule-based + Deterministic AI
+    const scenario2Steps = ruleBasedSteps.length + deterministicSteps.length;
+    const scenario2Coverage = Math.round((scenario2Steps / totalSteps) * 100);
+    const scenario2Cost = 40; // Estimated cost reduction
+    const scenario2Time = 50; // Estimated time reduction
+    const scenario2Savings = 100 - scenario2Cost;
+    
+    // Scenario 3: Full Automation (All levels)
+    const scenario3Steps = ruleBasedSteps.length + deterministicSteps.length + agenticSteps.length;
+    const scenario3Coverage = Math.round((scenario3Steps / totalSteps) * 100);
+    const scenario3Cost = 20; // Maximum cost reduction
+    const scenario3Time = 25; // Maximum time reduction
+    const scenario3Savings = 100 - scenario3Cost;
+    
+    const scenarios = [
+        {
+            id: 1,
+            title: 'Scénario 1 : Processus Manuel (Baseline)',
+            subtitle: 'État actuel sans automatisation',
+            icon: '👤',
+            color: 'gray',
+            coverage: scenario1Coverage,
+            automated: 0,
+            manual: totalSteps,
+            timeReduction: scenario1Time,
+            costReduction: scenario1Cost,
+            savings: 0,
+            complexity: 'Faible',
+            timeline: 'N/A',
+            investment: 'Aucun',
+            technologies: [],
+            benefits: [
+                'Pas d\'investissement initial',
+                'Flexibilité maximale',
+                'Contrôle humain total'
+            ],
+            risks: [
+                'Coûts opérationnels élevés',
+                'Erreurs humaines possibles',
+                'Scalabilité limitée',
+                'Lenteur d\'exécution'
+            ],
+            steps: manualSteps.concat(ruleBasedSteps, deterministicSteps, agenticSteps)
+        },
+        {
+            id: 2,
+            title: 'Scénario 2 : Automatisation Classique',
+            subtitle: 'RPA + IA Déterministe (Quick Wins)',
+            icon: '⚙️🧠',
+            color: 'blue',
+            coverage: scenario2Coverage,
+            automated: scenario2Steps,
+            manual: totalSteps - scenario2Steps,
+            timeReduction: scenario2Time,
+            costReduction: scenario2Cost,
+            savings: scenario2Savings,
+            complexity: 'Moyenne',
+            timeline: '3-6 mois',
+            investment: '€€',
+            technologies: [
+                'RPA : UiPath, Power Automate',
+                'ML : Scikit-learn, TensorFlow',
+                'Orchestration : Apache Airflow',
+                'Monitoring : Datadog, Prometheus'
+            ],
+            benefits: [
+                `${scenario2Savings}% de réduction des coûts opérationnels`,
+                `${scenario2Steps} étapes automatisées (${scenario2Coverage}%)`,
+                'ROI rapide (< 12 mois)',
+                'Réduction des erreurs',
+                'Technologies matures et éprouvées'
+            ],
+            risks: [
+                'Maintenance des règles nécessaire',
+                'Rigidité face aux changements',
+                'Nécessite données d\'entraînement (ML)',
+                `${totalSteps - scenario2Steps} étapes restent manuelles`
+            ],
+            steps: ruleBasedSteps.concat(deterministicSteps)
+        },
+        {
+            id: 3,
+            title: 'Scénario 3 : Automatisation Complète avec IA Agentique',
+            subtitle: 'RPA + IA Déterministe + Agents LLM',
+            icon: '⚙️🧠🤖',
+            color: 'purple',
+            coverage: scenario3Coverage,
+            automated: scenario3Steps,
+            manual: totalSteps - scenario3Steps,
+            timeReduction: scenario3Time,
+            costReduction: scenario3Cost,
+            savings: scenario3Savings,
+            complexity: 'Élevée',
+            timeline: '6-18 mois',
+            investment: '€€€',
+            technologies: [
+                'Scénario 2 +',
+                'LLM : GPT-4, Claude, Gemini',
+                'Agents IA : LangChain, AutoGPT, CrewAI',
+                'Vector DB : Pinecone, Weaviate',
+                'Orchestration : LangGraph, Semantic Kernel'
+            ],
+            benefits: [
+                `${scenario3Savings}% de réduction des coûts opérationnels`,
+                `${scenario3Steps} étapes automatisées (${scenario3Coverage}%)`,
+                'Gestion de la complexité et l\'imprévu',
+                'Adaptation contextuelle intelligente',
+                'Scalabilité quasi-illimitée',
+                'Expérience utilisateur personnalisée'
+            ],
+            risks: [
+                'Investissement initial élevé',
+                'Expertise IA nécessaire',
+                'Coûts API LLM récurrents',
+                'Temps d\'implémentation plus long',
+                'Monitoring et governance critiques',
+                manualSteps.length > 0 ? `${manualSteps.length} étapes restent manuelles` : 'Automatisation quasi-complète'
+            ],
+            steps: ruleBasedSteps.concat(deterministicSteps, agenticSteps)
+        }
+    ];
+    
+    container.innerHTML = `
+        <div class="space-y-6">
+            ${scenarios.map((scenario, index) => `
+                <div class="bg-gradient-to-br from-${scenario.color}-50 to-white border-2 border-${scenario.color}-200 rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-4xl">${scenario.icon}</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">${scenario.title}</h3>
+                                    <p class="text-sm text-gray-600">${scenario.subtitle}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="bg-white rounded-lg px-4 py-2 border-2 border-${scenario.color}-300">
+                                <div class="text-3xl font-bold text-${scenario.color}-600">${scenario.coverage}%</div>
+                                <div class="text-xs text-gray-600">Couverture</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+                        <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                            <div class="text-xs text-gray-600 mb-1">Étapes automatisées</div>
+                            <div class="text-lg font-bold text-${scenario.color}-600">${scenario.automated}/${totalSteps}</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                            <div class="text-xs text-gray-600 mb-1">Économies</div>
+                            <div class="text-lg font-bold text-green-600">${scenario.savings}%</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                            <div class="text-xs text-gray-600 mb-1">Complexité</div>
+                            <div class="text-lg font-bold text-gray-700">${scenario.complexity}</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                            <div class="text-xs text-gray-600 mb-1">Timeline</div>
+                            <div class="text-lg font-bold text-gray-700">${scenario.timeline}</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                            <div class="text-xs text-gray-600 mb-1">Investissement</div>
+                            <div class="text-lg font-bold text-gray-700">${scenario.investment}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Technologies -->
+                    ${scenario.technologies.length > 0 ? `
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-tools mr-2"></i>Stack Technologique
+                            </h4>
+                            <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200">
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    ${scenario.technologies.map(tech => `
+                                        <li class="flex items-start">
+                                            <i class="fas fa-chevron-right text-${scenario.color}-500 mr-2 mt-1 text-xs"></i>
+                                            <span>${tech}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Steps Covered -->
+                    ${scenario.steps.length > 0 ? `
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-tasks mr-2"></i>Étapes Concernées (${scenario.steps.length})
+                            </h4>
+                            <div class="bg-white rounded-lg p-3 border border-${scenario.color}-200 max-h-40 overflow-y-auto">
+                                <ul class="text-sm space-y-1">
+                                    ${scenario.steps.slice(0, 5).map(step => {
+                                        const typeIcons = {
+                                            'rule-based': '⚙️',
+                                            'deterministic-ai': '🧠',
+                                            'agentic-ai': '🤖',
+                                            'manual': '👤'
+                                        };
+                                        return `
+                                            <li class="flex items-start text-gray-700">
+                                                <span class="mr-2">${typeIcons[step.automationType]}</span>
+                                                <span>${step.description}</span>
+                                            </li>
+                                        `;
+                                    }).join('')}
+                                    ${scenario.steps.length > 5 ? `
+                                        <li class="text-gray-500 italic ml-6">... et ${scenario.steps.length - 5} autre(s)</li>
+                                    ` : ''}
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Benefits & Risks -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-semibold text-green-700 mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>Bénéfices
+                            </h4>
+                            <ul class="text-sm space-y-1">
+                                ${scenario.benefits.map(benefit => `
+                                    <li class="flex items-start text-gray-700">
+                                        <i class="fas fa-plus text-green-500 mr-2 mt-1 text-xs"></i>
+                                        <span>${benefit}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-red-700 mb-2">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Risques & Contraintes
+                            </h4>
+                            <ul class="text-sm space-y-1">
+                                ${scenario.risks.map(risk => `
+                                    <li class="flex items-start text-gray-700">
+                                        <i class="fas fa-minus text-red-500 mr-2 mt-1 text-xs"></i>
+                                        <span>${risk}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    ${index < scenarios.length - 1 ? `
+                        <div class="mt-4 pt-4 border-t border-${scenario.color}-200">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-arrow-down mr-2"></i>
+                                <span>Pour passer au scénario suivant, ajoutez : <strong>${scenarios[index + 1].title.split(':')[1]}</strong></span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('')}
+        </div>
+        
+        <!-- Comparison Summary -->
+        <div class="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-balance-scale mr-2"></i>
+                Tableau Comparatif
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b-2 border-indigo-300">
+                            <th class="text-left py-2 px-3 font-semibold">Critère</th>
+                            <th class="text-center py-2 px-3 font-semibold">Scénario 1<br/>(Manuel)</th>
+                            <th class="text-center py-2 px-3 font-semibold">Scénario 2<br/>(Classique)</th>
+                            <th class="text-center py-2 px-3 font-semibold">Scénario 3<br/>(IA Agentique)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        <tr class="border-b border-indigo-100">
+                            <td class="py-2 px-3 font-medium">Couverture</td>
+                            <td class="text-center py-2 px-3">${scenarios[0].coverage}%</td>
+                            <td class="text-center py-2 px-3 bg-blue-50">${scenarios[1].coverage}%</td>
+                            <td class="text-center py-2 px-3 bg-purple-50">${scenarios[2].coverage}%</td>
+                        </tr>
+                        <tr class="border-b border-indigo-100">
+                            <td class="py-2 px-3 font-medium">Économies</td>
+                            <td class="text-center py-2 px-3">${scenarios[0].savings}%</td>
+                            <td class="text-center py-2 px-3 bg-blue-50 text-green-600 font-bold">${scenarios[1].savings}%</td>
+                            <td class="text-center py-2 px-3 bg-purple-50 text-green-600 font-bold">${scenarios[2].savings}%</td>
+                        </tr>
+                        <tr class="border-b border-indigo-100">
+                            <td class="py-2 px-3 font-medium">Investissement</td>
+                            <td class="text-center py-2 px-3">${scenarios[0].investment}</td>
+                            <td class="text-center py-2 px-3 bg-blue-50">${scenarios[1].investment}</td>
+                            <td class="text-center py-2 px-3 bg-purple-50">${scenarios[2].investment}</td>
+                        </tr>
+                        <tr class="border-b border-indigo-100">
+                            <td class="py-2 px-3 font-medium">Timeline</td>
+                            <td class="text-center py-2 px-3">${scenarios[0].timeline}</td>
+                            <td class="text-center py-2 px-3 bg-blue-50">${scenarios[1].timeline}</td>
+                            <td class="text-center py-2 px-3 bg-purple-50">${scenarios[2].timeline}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-medium">Complexité</td>
+                            <td class="text-center py-2 px-3">${scenarios[0].complexity}</td>
+                            <td class="text-center py-2 px-3 bg-blue-50">${scenarios[1].complexity}</td>
+                            <td class="text-center py-2 px-3 bg-purple-50">${scenarios[2].complexity}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 p-4 bg-white rounded-lg border border-indigo-200">
+                <p class="text-sm text-gray-700">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    <strong>Recommandation :</strong> 
+                    ${scenario2Coverage >= 70 ? 
+                        'Commencez par le Scénario 2 pour des gains rapides, puis évaluez le Scénario 3 selon vos besoins de complexité.' :
+                        scenario3Coverage >= 80 ?
+                        'Le Scénario 3 est recommandé pour maximiser l\'automatisation de ce processus complexe.' :
+                        'Approche progressive recommandée : démarrez avec le Scénario 2, puis passez au Scénario 3 selon le ROI observé.'
+                    }
+                </p>
+            </div>
+        </div>
+    `;
 }
 
 // Initialize
