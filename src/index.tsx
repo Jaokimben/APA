@@ -39,6 +39,7 @@ app.get('/', (c) => {
         <title>Agentic Process Analyzer - Automatisation Intelligente des Processus</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script>
           tailwind.config = {
             theme: {
@@ -176,6 +177,23 @@ app.get('/', (c) => {
                         Analyse du Processus
                     </h2>
                     <div id="processOverview"></div>
+                </div>
+
+                <!-- Process Visualization -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-project-diagram text-indigo-500 mr-2"></i>
+                        Visualisation du Processus
+                    </h2>
+                    <div class="mb-4 flex gap-2">
+                        <button onclick="switchDiagram('flow')" id="btn-flow" class="diagram-btn px-4 py-2 rounded-lg bg-indigo-500 text-white font-semibold text-sm">
+                            <i class="fas fa-stream mr-2"></i>Flux de Processus
+                        </button>
+                        <button onclick="switchDiagram('swimlane')" id="btn-swimlane" class="diagram-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm">
+                            <i class="fas fa-layer-group mr-2"></i>Swimlane (par niveau)
+                        </button>
+                    </div>
+                    <div id="processDiagram" class="bg-gray-50 p-6 rounded-lg border border-gray-200 overflow-x-auto"></div>
                 </div>
 
                 <!-- Automation Analysis -->

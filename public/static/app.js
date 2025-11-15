@@ -1,4 +1,6 @@
 let currentProcessType = 'text';
+let currentDiagramType = 'flow';
+let currentProcessData = null;
 
 function setProcessType(type) {
     currentProcessType = type;
@@ -59,8 +61,14 @@ async function analyzeProcess() {
 }
 
 function displayResults(data) {
+    // Store data for diagram switching
+    currentProcessData = data;
+    
     // Process Overview
     displayProcessOverview(data);
+    
+    // Process Diagram
+    displayProcessDiagram(data);
     
     // Automation Statistics
     displayAutomationStats(data.statistics);
@@ -390,8 +398,199 @@ function displayRecommendations(recommendations) {
     }).join('');
 }
 
+function switchDiagram(type) {
+    currentDiagramType = type;
+    
+    // Update button styles
+    const buttons = document.querySelectorAll('.diagram-btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-indigo-500', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    
+    const activeBtn = document.getElementById(`btn-${type}`);
+    activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+    activeBtn.classList.add('bg-indigo-500', 'text-white');
+    
+    // Redraw diagram
+    if (currentProcessData) {
+        displayProcessDiagram(currentProcessData);
+    }
+}
+
+function displayProcessDiagram(data) {
+    const container = document.getElementById('processDiagram');
+    
+    let mermaidCode = '';
+    
+    if (currentDiagramType === 'flow') {
+        mermaidCode = generateFlowDiagram(data);
+    } else {
+        mermaidCode = generateSwimlanesDiagram(data);
+    }
+    
+    // Create unique ID for mermaid diagram
+    const diagramId = 'mermaid-' + Date.now();
+    container.innerHTML = `<div class="mermaid" id="${diagramId}">${mermaidCode}</div>`;
+    
+    // Render mermaid diagram
+    try {
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+        mermaid.run({
+            querySelector: `#${diagramId}`
+        });
+    } catch (error) {
+        console.error('Mermaid rendering error:', error);
+        container.innerHTML = '<p class="text-red-500">Erreur lors du rendu du diagramme</p>';
+    }
+}
+
+function generateFlowDiagram(data) {
+    const steps = data.steps;
+    
+    // Color mapping for automation types
+    const colorMap = {
+        'rule-based': 'fill:#DBEAFE,stroke:#3B82F6,stroke-width:2px',
+        'deterministic-ai': 'fill:#D1FAE5,stroke:#10B981,stroke-width:2px',
+        'agentic-ai': 'fill:#E9D5FF,stroke:#A855F7,stroke-width:2px',
+        'manual': 'fill:#F3F4F6,stroke:#6B7280,stroke-width:2px'
+    };
+    
+    // Icon mapping
+    const iconMap = {
+        'rule-based': '⚙️',
+        'deterministic-ai': '🧠',
+        'agentic-ai': '🤖',
+        'manual': '👤'
+    };
+    
+    let diagram = 'graph TD\n';
+    diagram += '    Start([Début du Processus])\n';
+    
+    // Add steps
+    steps.forEach((step, index) => {
+        const nodeId = `Step${step.id}`;
+        const icon = iconMap[step.automationType] || '📋';
+        const label = `${icon} ${step.description}`;
+        const escapedLabel = label.replace(/"/g, '#quot;').substring(0, 60);
+        
+        diagram += `    ${nodeId}["${escapedLabel}"]\n`;
+    });
+    
+    diagram += '    End([Fin du Processus])\n\n';
+    
+    // Add connections
+    diagram += '    Start --> Step1\n';
+    for (let i = 1; i < steps.length; i++) {
+        diagram += `    Step${i} --> Step${i + 1}\n`;
+    }
+    diagram += `    Step${steps.length} --> End\n\n`;
+    
+    // Add styling
+    steps.forEach((step) => {
+        const style = colorMap[step.automationType] || colorMap['manual'];
+        diagram += `    style Step${step.id} ${style}\n`;
+    });
+    
+    diagram += '    style Start fill:#FEF3C7,stroke:#F59E0B,stroke-width:3px\n';
+    diagram += '    style End fill:#D1FAE5,stroke:#10B981,stroke-width:3px\n';
+    
+    return diagram;
+}
+
+function generateSwimlanesDiagram(data) {
+    const steps = data.steps;
+    
+    // Group steps by automation type
+    const grouped = {
+        'rule-based': steps.filter(s => s.automationType === 'rule-based'),
+        'deterministic-ai': steps.filter(s => s.automationType === 'deterministic-ai'),
+        'agentic-ai': steps.filter(s => s.automationType === 'agentic-ai'),
+        'manual': steps.filter(s => s.automationType === 'manual')
+    };
+    
+    const lanes = [
+        { type: 'rule-based', label: '⚙️ Automatisation par Règles', color: '#3B82F6' },
+        { type: 'deterministic-ai', label: '🧠 IA Déterministe', color: '#10B981' },
+        { type: 'agentic-ai', label: '🤖 IA Agentique (LLM)', color: '#A855F7' },
+        { type: 'manual', label: '👤 Manuel avec Support IA', color: '#6B7280' }
+    ];
+    
+    let diagram = 'graph TD\n';
+    diagram += '    Start([Début])\n';
+    
+    let previousNodes = ['Start'];
+    let currentStepIndex = 0;
+    
+    steps.forEach((step) => {
+        const nodeId = `S${step.id}`;
+        const label = step.description.substring(0, 50);
+        const escapedLabel = label.replace(/"/g, '#quot;');
+        
+        diagram += `    ${nodeId}["${escapedLabel}"]\n`;
+        
+        // Connect from previous nodes
+        previousNodes.forEach(prev => {
+            diagram += `    ${prev} --> ${nodeId}\n`;
+        });
+        
+        previousNodes = [nodeId];
+    });
+    
+    diagram += '    End([Fin])\n';
+    previousNodes.forEach(prev => {
+        diagram += `    ${prev} --> End\n`;
+    });
+    
+    diagram += '\n';
+    
+    // Styling by type
+    steps.forEach((step) => {
+        const nodeId = `S${step.id}`;
+        let style = '';
+        switch(step.automationType) {
+            case 'rule-based':
+                style = 'fill:#DBEAFE,stroke:#3B82F6,stroke-width:3px';
+                break;
+            case 'deterministic-ai':
+                style = 'fill:#D1FAE5,stroke:#10B981,stroke-width:3px';
+                break;
+            case 'agentic-ai':
+                style = 'fill:#E9D5FF,stroke:#A855F7,stroke-width:3px';
+                break;
+            case 'manual':
+                style = 'fill:#F3F4F6,stroke:#6B7280,stroke-width:3px';
+                break;
+        }
+        diagram += `    style ${nodeId} ${style}\n`;
+    });
+    
+    diagram += '    style Start fill:#FEF3C7,stroke:#F59E0B,stroke-width:3px\n';
+    diagram += '    style End fill:#D1FAE5,stroke:#10B981,stroke-width:3px\n';
+    
+    return diagram;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Mermaid
+    mermaid.initialize({ 
+        startOnLoad: false,
+        theme: 'default',
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true
+        }
+    });
+    
     // Add enter key support for textarea
     document.getElementById('processInput').addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'Enter') {
