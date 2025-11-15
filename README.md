@@ -65,7 +65,21 @@ L'application fournit également des **recommandations stratégiques** pour dép
    - Vue comparative des 3 niveaux avec caractéristiques techniques
    - Recommandations stratégiques priorisées par phases (court, moyen, long terme)
 
-5. **API Backend robuste**
+5. **Scénarios d'automatisation avec IA** ⭐ NOUVEAU
+   - **Scénario 1** : Baseline Manuel (état actuel)
+   - **Scénario 2** : Automatisation Classique (RPA + IA Déterministe)
+   - **Scénario 3** : Automatisation Complète (+ IA Agentique LLM)
+   - Pour chaque scénario :
+     - Stack technologique détaillé
+     - Couverture d'automatisation (%)
+     - Économies estimées
+     - Timeline et investissement
+     - Bénéfices et risques
+     - Étapes concernées
+   - Tableau comparatif des 3 scénarios
+   - Recommandation personnalisée selon le processus
+
+6. **API Backend robuste**
    - Endpoint `/api/analyze` pour analyse de processus
    - Support CORS pour intégrations tierces
    - Gestion d'erreurs complète
@@ -176,6 +190,7 @@ webapp/
    - Analyse détaillée par étape avec technologies
    - Comparaison des 3 niveaux d'automatisation
    - Recommandations stratégiques priorisées
+   - **🚀 Scénarios d'implémentation** avec ROI et comparaison
 
 ### Exemple de processus
 ```
