@@ -108,19 +108,19 @@ app.get('/', (c) => {
                 </p>
                 <div class="grid md:grid-cols-3 gap-4 mt-6">
                     <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                        <i class="fas fa-code text-blue-500 text-2xl mb-2"></i>
-                        <h3 class="font-bold text-gray-800">Digitalisation Classique</h3>
-                        <p class="text-sm text-gray-600">Automatisation des tâches répétitives et prévisibles</p>
+                        <i class="fas fa-gears text-blue-500 text-2xl mb-2"></i>
+                        <h3 class="font-bold text-gray-800">Automatisation Basée sur Règles</h3>
+                        <p class="text-sm text-gray-600">RPA, workflows, scripts pour tâches répétitives</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <i class="fas fa-network-wired text-green-500 text-2xl mb-2"></i>
+                        <h3 class="font-bold text-gray-800">IA Déterministe</h3>
+                        <p class="text-sm text-gray-600">Classification, prédiction, reconnaissance de patterns</p>
                     </div>
                     <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
                         <i class="fas fa-robot text-purple-500 text-2xl mb-2"></i>
-                        <h3 class="font-bold text-gray-800">IA Agentique</h3>
-                        <p class="text-sm text-gray-600">Agents autonomes pour tâches complexes et décisionnelles</p>
-                    </div>
-                    <div class="bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">
-                        <i class="fas fa-chart-pie text-cyan-500 text-2xl mb-2"></i>
-                        <h3 class="font-bold text-gray-800">Analyse ROI</h3>
-                        <p class="text-sm text-gray-600">Évaluation du potentiel d'automatisation et gains</p>
+                        <h3 class="font-bold text-gray-800">IA Agentique (LLM)</h3>
+                        <p class="text-sm text-gray-600">Agents autonomes avec raisonnement et génération</p>
                     </div>
                 </div>
             </div>
@@ -199,10 +199,10 @@ app.get('/', (c) => {
                 <!-- Comparison View -->
                 <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                        <i class="fas fa-code-compare text-green-500 mr-2"></i>
-                        Comparaison: Digitalisation vs IA Agentique
+                        <i class="fas fa-layer-group text-green-500 mr-2"></i>
+                        Niveaux d'Automatisation
                     </h2>
-                    <div id="comparisonView" class="grid md:grid-cols-2 gap-6"></div>
+                    <div id="comparisonView" class="grid md:grid-cols-3 gap-4"></div>
                 </div>
 
                 <!-- Recommendations -->
@@ -251,10 +251,13 @@ function analyzeProcess(description: string, type: string = 'text') {
       id: index + 1,
       description: step,
       automationType: automationType.type,
+      subType: automationType.subType,
       complexity: automationType.complexity,
       reason: automationType.reason,
       effort: automationType.effort,
-      benefits: automationType.benefits
+      benefits: automationType.benefits,
+      examples: automationType.examples,
+      technology: automationType.technology
     }
   })
 
@@ -295,40 +298,98 @@ function determineAutomationType(step: string) {
   const stepLower = step.toLowerCase()
   
   // Keywords for different automation types
-  const digitalKeywords = ['saisie', 'validation', 'enregistrement', 'notification', 'email', 'confirmation', 'calcul', 'assignation automatique']
-  const agenticKeywords = ['décision', 'analyse', 'évaluation', 'jugement', 'négociation', 'créativité', 'adaptation', 'complexe', 'imprévu']
-  const manualKeywords = ['préparation', 'cuisson', 'emballage', 'livraison', 'manipulation', 'assemblage']
   
-  // Check for agentic (AI agents)
-  if (agenticKeywords.some(kw => stepLower.includes(kw))) {
+  // 1. Rule-based automation (RPA, workflows, scripts)
+  const ruleBasedKeywords = ['saisie', 'enregistrement', 'notification', 'email', 'confirmation', 'transfert', 'copie', 'mise à jour', 'archivage']
+  
+  // 2. Deterministic AI (classification, prediction, pattern recognition)
+  const deterministicAIKeywords = ['validation', 'vérification', 'détection', 'reconnaissance', 'classification', 'tri', 'filtrage', 'scoring', 'prédiction', 'routage intelligent']
+  
+  // 3. Agentic AI (LLM, generative, reasoning)
+  const agenticAIKeywords = ['décision', 'analyse', 'évaluation', 'jugement', 'négociation', 'recommandation', 'rédaction', 'génération', 'adaptation', 'créativité', 'compréhension', 'interprétation', 'résolution', 'optimisation complexe']
+  
+  // 4. Manual tasks
+  const manualKeywords = ['préparation', 'cuisson', 'emballage', 'livraison physique', 'manipulation', 'assemblage', 'fabrication']
+  
+  // Check for Agentic AI (LLM-based)
+  if (agenticAIKeywords.some(kw => stepLower.includes(kw))) {
     return {
-      type: 'agentic',
+      type: 'agentic-ai',
+      subType: 'LLM & IA Générative',
       complexity: 'Élevée',
-      reason: 'Nécessite prise de décision, analyse contextuelle ou adaptation',
+      reason: 'Nécessite raisonnement, compréhension contextuelle ou génération de contenu',
       effort: 'Élevé',
-      benefits: 'Automatisation intelligente de tâches complexes'
+      benefits: 'Automatisation de tâches cognitives complexes avec adaptation',
+      examples: 'Agents autonomes, génération de réponses, analyse sémantique',
+      technology: 'GPT-4, Claude, LangChain, AutoGPT'
     }
   }
   
-  // Check for digital automation
-  if (digitalKeywords.some(kw => stepLower.includes(kw))) {
+  // Check for Deterministic AI
+  if (deterministicAIKeywords.some(kw => stepLower.includes(kw))) {
     return {
-      type: 'digital',
-      complexity: 'Faible',
-      reason: 'Tâche répétitive et prévisible, facile à automatiser',
-      effort: 'Faible',
-      benefits: 'Réduction des erreurs et gain de temps immédiat'
-    }
-  }
-  
-  // Check if partially automatable
-  if (stepLower.includes('paiement') || stepLower.includes('commande') || stepLower.includes('suivi')) {
-    return {
-      type: 'hybrid',
+      type: 'deterministic-ai',
+      subType: 'IA Déterministe',
       complexity: 'Moyenne',
-      reason: 'Combine automatisation digitale et supervision IA',
+      reason: 'Classification, prédiction ou reconnaissance de patterns',
       effort: 'Moyen',
-      benefits: 'Optimisation avec surveillance intelligente'
+      benefits: 'Automatisation intelligente basée sur apprentissage supervisé',
+      examples: 'Classification de documents, détection de fraude, scoring',
+      technology: 'Scikit-learn, TensorFlow, Random Forest, SVM'
+    }
+  }
+  
+  // Check for Rule-based automation
+  if (ruleBasedKeywords.some(kw => stepLower.includes(kw))) {
+    return {
+      type: 'rule-based',
+      subType: 'Automatisation par Règles',
+      complexity: 'Faible',
+      reason: 'Tâche répétitive suivant des règles précises et prévisibles',
+      effort: 'Faible',
+      benefits: 'ROI rapide, réduction immédiate des erreurs',
+      examples: 'RPA, workflows, scripts, intégrations API',
+      technology: 'UiPath, Power Automate, Zapier, Python scripts'
+    }
+  }
+  
+  // Special cases requiring hybrid approaches
+  if (stepLower.includes('paiement') || stepLower.includes('payment')) {
+    return {
+      type: 'rule-based',
+      subType: 'Automatisation par Règles + IA Déterministe',
+      complexity: 'Moyenne',
+      reason: 'Processus transactionnel avec validation et détection de fraude',
+      effort: 'Moyen',
+      benefits: 'Sécurisation et fluidification des transactions',
+      examples: 'Gateway de paiement avec détection de fraude',
+      technology: 'Stripe, PayPal + ML fraud detection'
+    }
+  }
+  
+  if (stepLower.includes('commande') && !stepLower.includes('passe')) {
+    return {
+      type: 'deterministic-ai',
+      subType: 'IA Déterministe',
+      complexity: 'Moyenne',
+      reason: 'Validation et routage intelligent des commandes',
+      effort: 'Moyen',
+      benefits: 'Optimisation du flux de commandes et priorisation',
+      examples: 'Système de gestion intelligente des commandes',
+      technology: 'Machine Learning pour priorisation'
+    }
+  }
+  
+  if (stepLower.includes('assignation') || stepLower.includes('attribution')) {
+    return {
+      type: 'deterministic-ai',
+      subType: 'IA Déterministe',
+      complexity: 'Moyenne',
+      reason: 'Optimisation de l\'assignation basée sur critères multiples',
+      effort: 'Moyen',
+      benefits: 'Distribution optimale des ressources',
+      examples: 'Algorithmes d\'optimisation, load balancing',
+      technology: 'Algorithmes d\'optimisation, ML'
     }
   }
   
@@ -336,40 +397,63 @@ function determineAutomationType(step: string) {
   if (manualKeywords.some(kw => stepLower.includes(kw))) {
     return {
       type: 'manual',
+      subType: 'Manuel avec Support IA',
       complexity: 'Variable',
       reason: 'Nécessite intervention physique ou expertise humaine',
       effort: 'N/A',
-      benefits: 'Support IA possible pour optimisation et guidage'
+      benefits: 'Support IA possible : guidage, optimisation, prédiction',
+      examples: 'Assistants IA, vision par ordinateur pour guidage',
+      technology: 'IoT sensors, Computer Vision, AR'
     }
   }
   
-  // Default to hybrid
+  // Default: analyze based on complexity indicators
+  if (stepLower.includes('client') || stepLower.includes('utilisateur') || stepLower.includes('demande')) {
+    return {
+      type: 'agentic-ai',
+      subType: 'LLM & IA Générative',
+      complexity: 'Moyenne-Élevée',
+      reason: 'Interaction client nécessitant compréhension et personnalisation',
+      effort: 'Moyen-Élevé',
+      benefits: 'Expérience client personnalisée et scalable',
+      examples: 'Chatbots intelligents, assistants virtuels',
+      technology: 'GPT-4, Claude, Rasa'
+    }
+  }
+  
+  // Final default
   return {
-    type: 'hybrid',
-    complexity: 'Moyenne',
-    reason: 'Analyse contextuelle nécessaire',
-    effort: 'Moyen',
-    benefits: 'Combinaison digitalisation et IA recommandée'
+    type: 'rule-based',
+    subType: 'Automatisation par Règles',
+    complexity: 'Faible-Moyenne',
+    reason: 'Processus standard automatisable par règles',
+    effort: 'Faible-Moyen',
+    benefits: 'Gain d\'efficacité avec automatisation classique',
+    examples: 'Workflows, scripts',
+    technology: 'Automatisation standard'
   }
 }
 
 function calculateStats(steps: any[]) {
   const total = steps.length
-  const digital = steps.filter(s => s.automationType === 'digital').length
-  const agentic = steps.filter(s => s.automationType === 'agentic').length
-  const hybrid = steps.filter(s => s.automationType === 'hybrid').length
+  const ruleBased = steps.filter(s => s.automationType === 'rule-based').length
+  const deterministicAI = steps.filter(s => s.automationType === 'deterministic-ai').length
+  const agenticAI = steps.filter(s => s.automationType === 'agentic-ai').length
   const manual = steps.filter(s => s.automationType === 'manual').length
+  
+  const automatable = ruleBased + deterministicAI + agenticAI
   
   return {
     total,
-    digital,
-    agentic,
-    hybrid,
+    ruleBased,
+    deterministicAI,
+    agenticAI,
     manual,
-    automationPotential: Math.round(((digital + agentic + hybrid) / total) * 100),
-    digitalPercentage: Math.round((digital / total) * 100),
-    agenticPercentage: Math.round((agentic / total) * 100),
-    hybridPercentage: Math.round((hybrid / total) * 100),
+    automatable,
+    automationPotential: Math.round((automatable / total) * 100),
+    ruleBasedPercentage: Math.round((ruleBased / total) * 100),
+    deterministicAIPercentage: Math.round((deterministicAI / total) * 100),
+    agenticAIPercentage: Math.round((agenticAI / total) * 100),
     manualPercentage: Math.round((manual / total) * 100)
   }
 }
@@ -377,43 +461,78 @@ function calculateStats(steps: any[]) {
 function generateRecommendations(steps: any[], stats: any) {
   const recommendations = []
   
-  if (stats.digitalPercentage > 30) {
+  // Phase 1: Rule-based automation (Quick Wins)
+  if (stats.ruleBasedPercentage > 0) {
     recommendations.push({
       priority: 'Immédiat',
-      type: 'Quick Win',
-      title: 'Digitalisation Rapide',
-      description: `${stats.digitalPercentage}% des étapes peuvent être automatisées rapidement avec des solutions digitales classiques. Commencez par ces gains rapides.`,
-      icon: 'rocket'
+      type: 'Phase 1 - Quick Wins',
+      title: 'Automatisation par Règles',
+      description: `${stats.ruleBasedPercentage}% des étapes (${stats.ruleBased} étapes) peuvent être automatisées rapidement avec RPA, workflows et scripts. ROI rapide (< 6 mois). Technologies : UiPath, Power Automate, Zapier.`,
+      icon: 'rocket',
+      effort: 'Faible',
+      roi: 'Rapide (< 6 mois)'
     })
   }
   
-  if (stats.agenticPercentage > 20) {
+  // Phase 2: Deterministic AI (Medium term)
+  if (stats.deterministicAIPercentage > 0) {
     recommendations.push({
-      priority: 'Moyen Terme',
-      type: 'Innovation',
-      title: 'Déploiement d\'Agents IA',
-      description: `${stats.agenticPercentage}% des étapes nécessitent des agents IA autonomes. Investissement stratégique pour gestion de la complexité.`,
-      icon: 'brain'
+      priority: 'Court-Moyen Terme',
+      type: 'Phase 2 - IA Déterministe',
+      title: 'Classification et Prédiction',
+      description: `${stats.deterministicAIPercentage}% des étapes (${stats.deterministicAI} étapes) nécessitent de l'IA déterministe pour classification, détection ou prédiction. Technologies : Scikit-learn, TensorFlow, Random Forest.`,
+      icon: 'network-wired',
+      effort: 'Moyen',
+      roi: 'Moyen terme (6-12 mois)'
     })
   }
   
-  if (stats.manualPercentage > 40) {
+  // Phase 3: Agentic AI (Strategic)
+  if (stats.agenticAIPercentage > 0) {
+    recommendations.push({
+      priority: 'Moyen-Long Terme',
+      type: 'Phase 3 - IA Agentique',
+      title: 'Agents IA Autonomes (LLM)',
+      description: `${stats.agenticAIPercentage}% des étapes (${stats.agenticAI} étapes) nécessitent des agents IA avec LLM pour raisonnement, génération et adaptation. Technologies : GPT-4, Claude, LangChain, AutoGPT.`,
+      icon: 'brain',
+      effort: 'Élevé',
+      roi: 'Long terme (12-24 mois)'
+    })
+  }
+  
+  // Manual tasks with AI support
+  if (stats.manualPercentage > 30) {
     recommendations.push({
       priority: 'Long Terme',
-      type: 'Transformation',
-      title: 'Support IA pour Tâches Manuelles',
-      description: `${stats.manualPercentage}% des étapes sont manuelles. Considérez des assistants IA pour optimiser ces opérations.`,
-      icon: 'hands-helping'
+      type: 'Support & Optimisation',
+      title: 'Assistance IA pour Tâches Manuelles',
+      description: `${stats.manualPercentage}% des étapes (${stats.manual} étapes) restent manuelles mais peuvent bénéficier d'assistants IA, vision par ordinateur ou IoT pour guidage et optimisation.`,
+      icon: 'hands-helping',
+      effort: 'Variable',
+      roi: 'Cas par cas'
     })
   }
   
+  // Overall potential
   if (stats.automationPotential > 70) {
     recommendations.push({
       priority: 'Stratégique',
-      type: 'ROI Élevé',
-      title: 'Potentiel d\'Automatisation Excellent',
-      description: `Avec ${stats.automationPotential}% d'automatisation possible, ce processus est un candidat idéal pour une transformation complète.`,
-      icon: 'trophy'
+      type: 'Vision Globale',
+      title: 'Excellent Potentiel d\'Automatisation',
+      description: `Avec ${stats.automationPotential}% d'automatisation possible, ce processus est un candidat prioritaire pour transformation digitale. Approche recommandée : déploiement progressif en 3 phases (Règles → IA Déterministe → IA Agentique).`,
+      icon: 'trophy',
+      effort: 'Progressif',
+      roi: 'Très élevé'
+    })
+  } else if (stats.automationPotential > 40) {
+    recommendations.push({
+      priority: 'Stratégique',
+      type: 'Vision Globale',
+      title: 'Bon Potentiel d\'Automatisation',
+      description: `${stats.automationPotential}% d'automatisation possible. Priorisez les quick wins (règles) puis évaluez l'opportunité d'investir dans l'IA selon le ROI attendu.`,
+      icon: 'chart-line',
+      effort: 'Progressif',
+      roi: 'Élevé'
     })
   }
   

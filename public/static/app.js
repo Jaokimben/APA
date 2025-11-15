@@ -68,7 +68,7 @@ function displayResults(data) {
     // Detailed Steps Analysis
     displayStepsAnalysis(data.steps);
     
-    // Comparison View
+    // Comparison View (3 levels)
     displayComparisonView(data.steps);
     
     // Recommendations
@@ -105,28 +105,28 @@ function displayAutomationStats(stats) {
     
     const statsCards = [
         {
-            title: 'Digitalisation Classique',
-            value: stats.digital,
-            percentage: stats.digitalPercentage,
-            icon: 'code',
+            title: 'Automatisation par Règles',
+            value: stats.ruleBased,
+            percentage: stats.ruleBasedPercentage,
+            icon: 'gears',
             color: 'blue',
-            description: 'Étapes automatisables rapidement'
+            description: 'RPA, workflows, scripts'
         },
         {
-            title: 'IA Agentique',
-            value: stats.agentic,
-            percentage: stats.agenticPercentage,
+            title: 'IA Déterministe',
+            value: stats.deterministicAI,
+            percentage: stats.deterministicAIPercentage,
+            icon: 'network-wired',
+            color: 'green',
+            description: 'Classification, prédiction'
+        },
+        {
+            title: 'IA Agentique (LLM)',
+            value: stats.agenticAI,
+            percentage: stats.agenticAIPercentage,
             icon: 'robot',
             color: 'purple',
-            description: 'Nécessite agents IA autonomes'
-        },
-        {
-            title: 'Hybride / Manuel',
-            value: stats.hybrid + stats.manual,
-            percentage: stats.hybridPercentage + stats.manualPercentage,
-            icon: 'hands',
-            color: 'cyan',
-            description: 'Support IA possible'
+            description: 'Agents autonomes, génération'
         }
     ];
     
@@ -147,34 +147,34 @@ function displayStepsAnalysis(steps) {
     const container = document.getElementById('stepsAnalysis');
     
     const typeConfig = {
-        digital: {
+        'rule-based': {
             badge: 'bg-blue-100 text-blue-800',
-            icon: 'code',
+            icon: 'gears',
             iconColor: 'text-blue-500',
-            label: 'Digitalisation'
+            label: 'Automatisation par Règles'
         },
-        agentic: {
+        'deterministic-ai': {
+            badge: 'bg-green-100 text-green-800',
+            icon: 'network-wired',
+            iconColor: 'text-green-500',
+            label: 'IA Déterministe'
+        },
+        'agentic-ai': {
             badge: 'bg-purple-100 text-purple-800',
             icon: 'robot',
             iconColor: 'text-purple-500',
-            label: 'IA Agentique'
+            label: 'IA Agentique (LLM)'
         },
-        hybrid: {
-            badge: 'bg-cyan-100 text-cyan-800',
-            icon: 'layer-group',
-            iconColor: 'text-cyan-500',
-            label: 'Hybride'
-        },
-        manual: {
+        'manual': {
             badge: 'bg-gray-100 text-gray-800',
             icon: 'hand',
             iconColor: 'text-gray-500',
-            label: 'Manuel'
+            label: 'Manuel avec Support IA'
         }
     };
     
     container.innerHTML = steps.map(step => {
-        const config = typeConfig[step.automationType] || typeConfig.hybrid;
+        const config = typeConfig[step.automationType] || typeConfig['rule-based'];
         return `
             <div class="mb-4 p-5 bg-gray-50 rounded-lg border border-gray-200 process-step">
                 <div class="flex items-start justify-between mb-3">
@@ -184,30 +184,50 @@ function displayStepsAnalysis(steps) {
                         </div>
                         <div class="flex-1">
                             <p class="text-gray-800 font-semibold mb-2">${step.description}</p>
-                            <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${config.badge}">
-                                <i class="fas fa-${config.icon} mr-1"></i>
-                                ${config.label}
-                            </span>
+                            <div class="space-y-1">
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${config.badge}">
+                                    <i class="fas fa-${config.icon} mr-1"></i>
+                                    ${config.label}
+                                </span>
+                                ${step.subType ? `<span class="inline-block px-3 py-1 rounded-full text-xs bg-white border border-gray-300 text-gray-700 ml-2">
+                                    ${step.subType}
+                                </span>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="ml-13 mt-3 grid md:grid-cols-3 gap-3 text-sm">
+                <div class="ml-13 mt-3 grid md:grid-cols-4 gap-3 text-sm">
                     <div class="bg-white p-3 rounded border border-gray-200">
                         <p class="text-gray-500 text-xs mb-1">Complexité</p>
-                        <p class="font-semibold text-gray-800">${step.complexity}</p>
+                        <p class="font-semibold text-gray-800 text-xs">${step.complexity}</p>
                     </div>
                     <div class="bg-white p-3 rounded border border-gray-200">
                         <p class="text-gray-500 text-xs mb-1">Effort</p>
-                        <p class="font-semibold text-gray-800">${step.effort}</p>
+                        <p class="font-semibold text-gray-800 text-xs">${step.effort}</p>
                     </div>
-                    <div class="bg-white p-3 rounded border border-gray-200 md:col-span-1">
+                    <div class="bg-white p-3 rounded border border-gray-200 md:col-span-2">
                         <p class="text-gray-500 text-xs mb-1">Bénéfices</p>
                         <p class="font-semibold text-gray-800 text-xs">${step.benefits}</p>
                     </div>
                 </div>
-                <div class="ml-13 mt-2 text-sm text-gray-600 italic">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    ${step.reason}
+                <div class="ml-13 mt-3 text-sm">
+                    <div class="bg-white p-3 rounded border border-gray-200">
+                        <p class="text-gray-600 italic mb-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            ${step.reason}
+                        </p>
+                        ${step.examples ? `
+                            <p class="text-xs text-gray-500 mb-1">
+                                <strong>Exemples:</strong> ${step.examples}
+                            </p>
+                        ` : ''}
+                        ${step.technology ? `
+                            <p class="text-xs text-blue-600">
+                                <i class="fas fa-tools mr-1"></i>
+                                <strong>Technologies:</strong> ${step.technology}
+                            </p>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;
@@ -217,90 +237,110 @@ function displayStepsAnalysis(steps) {
 function displayComparisonView(steps) {
     const container = document.getElementById('comparisonView');
     
-    const digitalSteps = steps.filter(s => s.automationType === 'digital');
-    const agenticSteps = steps.filter(s => s.automationType === 'agentic');
-    const hybridSteps = steps.filter(s => s.automationType === 'hybrid');
-    const manualSteps = steps.filter(s => s.automationType === 'manual');
+    const ruleBasedSteps = steps.filter(s => s.automationType === 'rule-based');
+    const deterministicAISteps = steps.filter(s => s.automationType === 'deterministic-ai');
+    const agenticAISteps = steps.filter(s => s.automationType === 'agentic-ai');
     
-    const digitalHTML = `
-        <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-300">
-            <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
-                <i class="fas fa-code text-2xl mr-3"></i>
-                Digitalisation Classique
-            </h3>
-            <p class="text-sm text-gray-600 mb-4">
-                Automatisation par scripts, workflows, RPA pour tâches répétitives
-            </p>
-            ${digitalSteps.length > 0 ? `
-                <ul class="space-y-2">
-                    ${digitalSteps.map(s => `
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-blue-500 mr-2 mt-1"></i>
-                            <span class="text-sm text-gray-700">${s.description}</span>
-                        </li>
-                    `).join('')}
-                </ul>
-            ` : '<p class="text-sm text-gray-500 italic">Aucune étape identifiée</p>'}
-            
-            <div class="mt-4 pt-4 border-t border-blue-200">
-                <p class="text-xs font-semibold text-blue-800 mb-2">Caractéristiques:</p>
-                <ul class="text-xs text-gray-600 space-y-1">
-                    <li>✓ Tâches répétitives et prévisibles</li>
-                    <li>✓ Règles métier fixes</li>
-                    <li>✓ Faible effort d'implémentation</li>
-                    <li>✓ ROI rapide (< 6 mois)</li>
-                </ul>
-            </div>
-        </div>
-    `;
+    const cards = [
+        {
+            title: 'Niveau 1: Automatisation par Règles',
+            icon: 'gears',
+            color: 'blue',
+            steps: ruleBasedSteps,
+            description: 'RPA, workflows, scripts pour tâches répétitives',
+            characteristics: [
+                'Règles métier fixes et prévisibles',
+                'Pas d\'apprentissage nécessaire',
+                'Implémentation rapide (< 3 mois)',
+                'ROI immédiat',
+                'Maintenance simple'
+            ],
+            examples: 'UiPath, Power Automate, Zapier, Python scripts'
+        },
+        {
+            title: 'Niveau 2: IA Déterministe',
+            icon: 'network-wired',
+            color: 'green',
+            steps: deterministicAISteps,
+            description: 'ML classique pour classification et prédiction',
+            characteristics: [
+                'Apprentissage supervisé sur données',
+                'Modèles entraînés et déployés',
+                'Prédictions déterministes',
+                'Performance mesurable',
+                'Nécessite données d\'entraînement'
+            ],
+            examples: 'Scikit-learn, TensorFlow, Random Forest, SVM'
+        },
+        {
+            title: 'Niveau 3: IA Agentique (LLM)',
+            icon: 'robot',
+            color: 'purple',
+            steps: agenticAISteps,
+            description: 'Agents autonomes avec LLM et IA générative',
+            characteristics: [
+                'Raisonnement et compréhension',
+                'Génération de contenu',
+                'Adaptation contextuelle',
+                'Autonomie et prise de décision',
+                'Apprentissage continu'
+            ],
+            examples: 'GPT-4, Claude, LangChain, AutoGPT, CrewAI'
+        }
+    ];
     
-    const agenticHTML = `
-        <div class="bg-purple-50 p-6 rounded-lg border-2 border-purple-300">
-            <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
-                <i class="fas fa-robot text-2xl mr-3"></i>
-                IA Agentique
+    container.innerHTML = cards.map(card => `
+        <div class="bg-${card.color}-50 p-6 rounded-lg border-2 border-${card.color}-300">
+            <h3 class="text-lg font-bold text-${card.color}-800 mb-3 flex items-center">
+                <i class="fas fa-${card.icon} text-2xl mr-3"></i>
+                ${card.title}
             </h3>
-            <p class="text-sm text-gray-600 mb-4">
-                Agents autonomes pour décisions complexes et adaptation contextuelle
+            <p class="text-sm text-gray-600 mb-4 font-semibold">
+                ${card.description}
             </p>
-            ${agenticSteps.length > 0 ? `
-                <ul class="space-y-2">
-                    ${agenticSteps.map(s => `
-                        <li class="flex items-start">
-                            <i class="fas fa-brain text-purple-500 mr-2 mt-1"></i>
-                            <span class="text-sm text-gray-700">${s.description}</span>
-                        </li>
-                    `).join('')}
-                </ul>
-            ` : '<p class="text-sm text-gray-500 italic">Aucune étape identifiée</p>'}
             
-            ${hybridSteps.length > 0 ? `
-                <div class="mt-3">
-                    <p class="text-xs font-semibold text-purple-700 mb-2">Étapes Hybrides:</p>
+            ${card.steps.length > 0 ? `
+                <div class="mb-4">
+                    <p class="text-xs font-semibold text-${card.color}-800 mb-2">
+                        Étapes concernées (${card.steps.length}):
+                    </p>
                     <ul class="space-y-1">
-                        ${hybridSteps.map(s => `
-                            <li class="flex items-start">
-                                <i class="fas fa-layer-group text-cyan-500 mr-2 mt-1 text-xs"></i>
-                                <span class="text-xs text-gray-600">${s.description}</span>
+                        ${card.steps.slice(0, 3).map(s => `
+                            <li class="flex items-start text-xs">
+                                <i class="fas fa-check-circle text-${card.color}-500 mr-2 mt-0.5"></i>
+                                <span class="text-gray-700">${s.description}</span>
                             </li>
                         `).join('')}
+                        ${card.steps.length > 3 ? `
+                            <li class="text-xs text-gray-500 italic ml-5">
+                                ... et ${card.steps.length - 3} autre(s)
+                            </li>
+                        ` : ''}
                     </ul>
                 </div>
-            ` : ''}
+            ` : `
+                <p class="text-sm text-gray-500 italic mb-4">
+                    Aucune étape identifiée pour ce niveau
+                </p>
+            `}
             
-            <div class="mt-4 pt-4 border-t border-purple-200">
-                <p class="text-xs font-semibold text-purple-800 mb-2">Caractéristiques:</p>
+            <div class="mt-4 pt-4 border-t border-${card.color}-200">
+                <p class="text-xs font-semibold text-${card.color}-800 mb-2">Caractéristiques:</p>
                 <ul class="text-xs text-gray-600 space-y-1">
-                    <li>✓ Décisions complexes et contextuelles</li>
-                    <li>✓ Apprentissage et adaptation</li>
-                    <li>✓ Gestion de l'imprévu</li>
-                    <li>✓ Investissement stratégique</li>
+                    ${card.characteristics.map(c => `
+                        <li>✓ ${c}</li>
+                    `).join('')}
                 </ul>
             </div>
+            
+            <div class="mt-3 pt-3 border-t border-${card.color}-200">
+                <p class="text-xs text-gray-500">
+                    <i class="fas fa-tools mr-1"></i>
+                    <strong>Technologies:</strong> ${card.examples}
+                </p>
+            </div>
         </div>
-    `;
-    
-    container.innerHTML = digitalHTML + agenticHTML;
+    `).join('');
 }
 
 function displayRecommendations(recommendations) {
@@ -308,8 +348,9 @@ function displayRecommendations(recommendations) {
     
     const priorityColors = {
         'Immédiat': 'red',
-        'Moyen Terme': 'yellow',
-        'Long Terme': 'blue',
+        'Court-Moyen Terme': 'orange',
+        'Moyen-Long Terme': 'blue',
+        'Long Terme': 'indigo',
         'Stratégique': 'green'
     };
     
@@ -318,16 +359,26 @@ function displayRecommendations(recommendations) {
         return `
             <div class="bg-white p-6 rounded-lg border-l-4 border-${color}-500 mb-4 process-step">
                 <div class="flex items-start justify-between mb-3">
-                    <div class="flex items-start space-x-3">
+                    <div class="flex items-start space-x-3 flex-1">
                         <i class="fas fa-${rec.icon} text-3xl text-${color}-500"></i>
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
                                 <span class="px-3 py-1 bg-${color}-100 text-${color}-800 rounded-full text-xs font-bold">
                                     ${rec.priority}
                                 </span>
                                 <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
                                     ${rec.type}
                                 </span>
+                                ${rec.effort ? `
+                                    <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
+                                        Effort: ${rec.effort}
+                                    </span>
+                                ` : ''}
+                                ${rec.roi ? `
+                                    <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs">
+                                        ROI: ${rec.roi}
+                                    </span>
+                                ` : ''}
                             </div>
                             <h3 class="text-lg font-bold text-gray-800 mb-2">${rec.title}</h3>
                             <p class="text-gray-600">${rec.description}</p>
