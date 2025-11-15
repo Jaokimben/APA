@@ -38,8 +38,11 @@ L'application fournit également des **recommandations stratégiques** pour dép
 ### ✅ Complété
 1. **Interface utilisateur intuitive**
    - Design moderne avec TailwindCSS et animations
-   - Support multi-format (description textuelle + BPMN)
-   - **Processus pré-définis** avec un clic (KYC/AML, Onboarding, P2P) ⭐ NOUVEAU
+   - **3 modes d'entrée au choix** :
+     - 🟠 **Titre du Processus** (par défaut) : Entrez juste le nom (ex: "KYC") et l'IA trouve les étapes ⭐ NOUVEAU v1.3
+     - 📝 **Description Textuelle** : Décrivez le processus étape par étape
+     - 📊 **Format BPMN** : Importez ou décrivez en notation BPMN
+   - **Base de connaissances** avec 7 processus pré-définis (KYC, Recrutement, Commandes, etc.) ⭐ NOUVEAU v1.3
    - Interface responsive et accessible
 
 2. **Analyse intelligente des processus**

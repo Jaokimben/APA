@@ -4,6 +4,71 @@ Toutes les modifications notables du projet sont documentées dans ce fichier.
 
 ---
 
+## [1.3.0] - 2025-11-15 - Recherche par Titre de Processus 🔍
+
+### ✨ Nouveautés Majeures
+- **Mode d'Entrée par Titre** (maintenant par défaut)
+  - Nouveau bouton orange "Titre du Processus" en mode principal
+  - Entrée simplifiée : juste le nom du processus (ex: "KYC", "Recrutement")
+  - Recherche automatique des étapes les plus pertinentes
+  - Remplissage automatique du textarea avec les étapes trouvées
+
+- **Base de Connaissances Processus**
+  - 7 processus pré-définis avec étapes détaillées :
+    - KYC/AML (Know Your Customer)
+    - Recrutement (Recruitment)
+    - Gestion des Commandes (Order Management)
+    - Onboarding Client (Customer Onboarding)
+    - Support Client (Customer Support)
+    - Purchase-to-Pay (P2P)
+    - Gestion des Sinistres (Claims Management)
+  - 40+ sous-étapes par processus
+  - Sources fiables mentionnées (Thomson Reuters, FATF, LinkedIn, SHRM, etc.)
+
+- **Génération Intelligente de Processus**
+  - Détection automatique du type de processus
+  - Génération d'étapes génériques si processus inconnu
+  - Support de 11 types de processus (Finance, RH, Ventes, IT, etc.)
+  - Adaptation contextuelle selon le secteur
+
+### 🎨 Interface Utilisateur
+- Nouveau mode "Titre du Processus" avec bouton orange distinctif
+- Placeholder mis à jour avec exemples valides
+- Notifications "info" bleues pour feedback recherche
+- Workflow UX amélioré :
+  1. Utilisateur entre titre → 2. Recherche étapes → 3. Affichage résultats → 4. Analyse automatique
+
+### 🔧 API Backend
+- **Nouvel endpoint** : `POST /api/search-process`
+  - Paramètre : `processTitle` (string)
+  - Retour : `{ title, description, source }`
+  - Recherche dans knowledge base
+  - Génération si non trouvé
+
+- **Fonctions Helper**
+  - `generateProcessFromTitle()` : Recherche et génération
+  - `detectProcessType()` : Détection automatique du type
+  - `generateGenericProcess()` : Génération d'étapes génériques
+  - `processKnowledgeBase` : Dictionnaire de 7 processus
+
+### 🐛 Corrections
+- `showNotification()` supporte maintenant 3 types : success, info, error
+- Gestion des couleurs : vert (success), bleu (info), rouge (error)
+- Icônes adaptées par type de notification
+
+### 📚 Documentation
+- README mis à jour avec mode "Titre du Processus"
+- Exemples d'utilisation du nouveau mode
+- Guide des processus pré-définis disponibles
+
+### 🎯 Impact Utilisateur
+- **Gain de temps** : Plus besoin de décrire le processus en détail
+- **Facilité d'utilisation** : Un simple titre suffit
+- **Qualité améliorée** : Étapes basées sur meilleures pratiques internationales
+- **Flexibilité** : 3 modes au choix (Titre, Texte, BPMN)
+
+---
+
 ## [1.2.0] - 2025-11-15 - Scénarios d'Automatisation 🚀
 
 ### ✨ Nouveautés Majeures
