@@ -25,13 +25,19 @@ L'application fournit également des **recommandations stratégiques** pour dép
 
 ## 🚀 URLs du projet
 
-### Environnement de développement
-- **URL Sandbox**: https://3000-i8cg55gj533mr7z6bw2ma-18e660f9.sandbox.novita.ai
-- **API Endpoint**: `/api/analyze` (POST)
+### GitHub Repository
+- **Repository**: https://github.com/Jaokimben/APA
+- **Branche**: `main`
+- **Version**: v1.3.0
 
-### Production
-- **Déploiement**: À venir sur Cloudflare Pages
-- **GitHub**: À configurer
+### Production Cloudflare Pages
+- **URL Production**: https://d35bc0e6.agentic-process-analyzer.pages.dev
+- **Projet Cloudflare**: `agentic-process-analyzer`
+- **Statut**: ✅ Déployé (v1.2.0 - mise à jour v1.3.0 à venir)
+
+### API Endpoints
+- **Analyse de processus**: `POST /api/analyze`
+- **Recherche par titre**: `POST /api/search-process` ⭐ NOUVEAU v1.3
 
 ## ✨ Fonctionnalités actuellement implémentées
 
