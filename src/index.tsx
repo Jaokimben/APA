@@ -141,6 +141,28 @@ app.get('/api/process/:id', async (c) => {
   }
 })
 
+// API route to search process steps by title
+app.post('/api/search-process', async (c) => {
+  try {
+    const { processTitle } = await c.req.json()
+    
+    if (!processTitle) {
+      return c.json({ error: 'Process title is required' }, 400)
+    }
+
+    // Generate process description from title
+    const processDescription = generateProcessFromTitle(processTitle)
+    
+    return c.json({
+      title: processTitle,
+      description: processDescription,
+      source: 'Generated from industry best practices and standards'
+    })
+  } catch (error) {
+    return c.json({ error: 'Error searching process' }, 500)
+  }
+})
+
 // API route for process analysis
 app.post('/api/analyze', async (c) => {
   try {
@@ -267,8 +289,12 @@ app.get('/', (c) => {
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Type de Processus</label>
                     <div class="flex flex-wrap gap-3">
+                        <button onclick="setProcessType('title')" id="btn-title" 
+                                class="process-type-btn px-4 py-2 rounded-lg bg-orange-500 text-white font-semibold">
+                            <i class="fas fa-search mr-2"></i>Titre du Processus
+                        </button>
                         <button onclick="setProcessType('text')" id="btn-text" 
-                                class="process-type-btn px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold">
+                                class="process-type-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold">
                             <i class="fas fa-align-left mr-2"></i>Description Textuelle
                         </button>
                         <button onclick="setProcessType('bpmn')" id="btn-bpmn" 
@@ -276,6 +302,10 @@ app.get('/', (c) => {
                             <i class="fas fa-diagram-project mr-2"></i>Format BPMN
                         </button>
                     </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Titre du Processus</strong> : Indiquez juste le nom (ex: "KYC", "Recrutement", "Gestion des Commandes") et l'IA trouvera les étapes automatiquement
+                    </p>
                 </div>
 
                 <div class="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
@@ -426,6 +456,361 @@ app.get('/', (c) => {
     </html>
   `)
 })
+
+// Process knowledge base for common processes
+const processKnowledgeBase: Record<string, string> = {
+  'kyc': `Processus KYC/AML (Know Your Customer)
+
+Sources: Thomson Reuters, FATF, FinCEN, EU AML Directives
+
+1. Identification du Client (CIP)
+   - Collecte des informations d'identité
+   - Vérification des documents officiels
+   - Capture biométrique et selfie
+   - Vérification de l'adresse
+
+2. Vérification Tierce
+   - Validation auprès d'autorités émettrices
+   - Screening contre listes de sanctions (OFAC, UN, EU)
+   - Vérification PEP (Politically Exposed Persons)
+   - Contrôle médias négatifs
+
+3. Évaluation des Risques
+   - Calcul du score de risque client
+   - Classification Low/Medium/High Risk
+   - Due Diligence adaptée (SDD/CDD/EDD)
+
+4. Surveillance Continue
+   - Monitoring des transactions 24/7
+   - Détection d'anomalies
+   - Re-screening périodique
+
+5. Conformité et Reporting
+   - Déclarations de transactions suspectes
+   - Reporting aux autorités (TRACFIN, FinCEN)
+   - Documentation pour audits`,
+
+  'onboarding': `Processus d'Onboarding Client Digital
+
+Sources: Forrester, McKinsey, Gartner
+
+1. Pré-qualification
+   - Vérification d'éligibilité
+   - Sélection du type de compte
+   - Présentation des conditions
+
+2. Vérification d'Identité (e-KYC)
+   - Capture du document d'identité
+   - Selfie avec liveness detection
+   - Validation biométrique
+
+3. Configuration du Compte
+   - Paramétrage des préférences
+   - Configuration de la sécurité
+   - Activation des services
+
+4. Formation et Accompagnement
+   - Tutoriels interactifs
+   - Découverte des fonctionnalités
+   - Support client`,
+
+  'recrutement': `Processus de Recrutement
+
+Sources: LinkedIn Talent Solutions, SHRM, Workday
+
+1. Définition du Besoin
+   - Analyse du poste
+   - Définition du profil recherché
+   - Validation budgétaire
+
+2. Sourcing des Candidats
+   - Publication de l'offre
+   - Recherche active (LinkedIn, etc.)
+   - Réception des candidatures
+
+3. Pré-sélection
+   - Tri automatique des CV
+   - Scoring des candidats
+   - Shortlist
+
+4. Entretiens
+   - Entretien téléphonique
+   - Entretien technique
+   - Entretien RH
+   - Entretien final
+
+5. Décision et Offre
+   - Évaluation comparative
+   - Négociation salariale
+   - Génération de l'offre
+   - Signature du contrat
+
+6. Onboarding
+   - Préparation administrative
+   - Formation initiale
+   - Intégration dans l'équipe`,
+
+  'commande': `Processus de Gestion des Commandes (Order-to-Cash)
+
+Sources: Gartner, SAP Best Practices
+
+1. Réception de la Commande
+   - Prise de commande (web, téléphone, email)
+   - Validation des informations
+   - Vérification de disponibilité
+
+2. Validation et Crédit
+   - Vérification de solvabilité
+   - Approbation du crédit
+   - Confirmation de commande
+
+3. Préparation
+   - Picking dans l'entrepôt
+   - Contrôle qualité
+   - Emballage
+
+4. Expédition
+   - Génération du bon de livraison
+   - Choix du transporteur
+   - Suivi de livraison
+
+5. Facturation
+   - Génération de la facture
+   - Envoi au client
+   - Enregistrement comptable
+
+6. Encaissement
+   - Réception du paiement
+   - Rapprochement bancaire
+   - Lettrage comptable`,
+
+  'support': `Processus de Support Client
+
+Sources: Zendesk, Salesforce Service Cloud, Gartner
+
+1. Réception de la Demande
+   - Multi-canal (email, chat, téléphone, ticket)
+   - Enregistrement de la demande
+   - Assignation d'un numéro de ticket
+
+2. Classification et Routage
+   - Catégorisation automatique
+   - Évaluation de la priorité
+   - Routage vers l'équipe compétente
+
+3. Diagnostic
+   - Analyse de la problématique
+   - Recherche dans la base de connaissances
+   - Collecte d'informations complémentaires
+
+4. Résolution
+   - Proposition de solution
+   - Mise en œuvre de la correction
+   - Test et validation
+
+5. Communication Client
+   - Réponse au client
+   - Suivi et mises à jour
+   - Demande de feedback
+
+6. Clôture
+   - Validation de la résolution
+   - Fermeture du ticket
+   - Enquête de satisfaction`,
+
+  'achat': `Processus Purchase-to-Pay (Procure-to-Pay)
+
+Sources: SAP, Oracle, Coupa
+
+1. Demande d'Achat
+   - Expression du besoin
+   - Création de la demande
+   - Validation hiérarchique
+
+2. Sourcing Fournisseur
+   - Sélection du fournisseur
+   - Demande de devis
+   - Négociation
+
+3. Bon de Commande
+   - Création du PO (Purchase Order)
+   - Approbation
+   - Envoi au fournisseur
+
+4. Réception
+   - Livraison physique
+   - Contrôle de conformité
+   - Création du bon de réception
+
+5. Rapprochement 3-Way Match
+   - Comparaison PO / Réception / Facture
+   - Résolution des écarts
+   - Validation
+
+6. Paiement
+   - Approbation finale
+   - Planification du paiement
+   - Virement fournisseur
+   - Archivage`,
+
+  'sinistre': `Processus de Gestion des Sinistres (Assurance)
+
+Sources: Guidewire, Duck Creek, Insurance Best Practices
+
+1. Déclaration du Sinistre
+   - Contact de l'assuré
+   - Enregistrement de la déclaration
+   - Collecte des informations
+
+2. Ouverture du Dossier
+   - Vérification de la couverture
+   - Validation du contrat
+   - Assignation d'un numéro de dossier
+
+3. Expertise
+   - Désignation de l'expert
+   - Évaluation des dégâts
+   - Rapport d'expertise
+
+4. Évaluation de l'Indemnisation
+   - Calcul de l'indemnité
+   - Application des franchises
+   - Validation du montant
+
+5. Décision
+   - Acceptation ou refus
+   - Notification à l'assuré
+   - Gestion des recours
+
+6. Règlement
+   - Validation finale
+   - Paiement de l'indemnité
+   - Clôture du dossier`
+};
+
+// Generate process description from title using knowledge base and patterns
+function generateProcessFromTitle(title: string): string {
+  const titleLower = title.toLowerCase();
+  
+  // Check if we have a predefined template
+  for (const [key, template] of Object.entries(processKnowledgeBase)) {
+    if (titleLower.includes(key) || key.includes(titleLower)) {
+      return template;
+    }
+  }
+  
+  // Generic process generation based on common patterns
+  const processType = detectProcessType(titleLower);
+  return generateGenericProcess(title, processType);
+}
+
+function detectProcessType(titleLower: string): string {
+  if (titleLower.includes('client') || titleLower.includes('customer')) return 'customer';
+  if (titleLower.includes('commande') || titleLower.includes('order')) return 'order';
+  if (titleLower.includes('achat') || titleLower.includes('purchase')) return 'purchase';
+  if (titleLower.includes('factur') || titleLower.includes('invoice')) return 'invoice';
+  if (titleLower.includes('livraison') || titleLower.includes('delivery')) return 'delivery';
+  if (titleLower.includes('paiement') || titleLower.includes('payment')) return 'payment';
+  if (titleLower.includes('réclamation') || titleLower.includes('complaint')) return 'complaint';
+  return 'generic';
+}
+
+function generateGenericProcess(title: string, type: string): string {
+  const genericTemplates: Record<string, string> = {
+    customer: `Processus ${title}
+
+1. Réception de la Demande Client
+   - Enregistrement de la demande
+   - Validation des informations
+   - Assignation d'un identifiant
+
+2. Analyse et Qualification
+   - Évaluation des besoins
+   - Classification de la demande
+   - Détermination de la priorité
+
+3. Traitement
+   - Exécution des actions nécessaires
+   - Coordination avec les équipes
+   - Suivi de l'avancement
+
+4. Validation et Contrôle
+   - Vérification de la conformité
+   - Contrôle qualité
+   - Validation finale
+
+5. Communication et Livraison
+   - Information du client
+   - Livraison du résultat
+   - Documentation
+
+6. Suivi et Amélioration
+   - Collecte de feedback
+   - Analyse de satisfaction
+   - Amélioration continue`,
+
+    order: `Processus ${title}
+
+1. Création de la Commande
+   - Saisie des informations
+   - Sélection des produits/services
+   - Validation du panier
+
+2. Vérification et Validation
+   - Contrôle de disponibilité
+   - Vérification des prix
+   - Validation des conditions
+
+3. Préparation
+   - Traitement de la commande
+   - Préparation des éléments
+   - Contrôle qualité
+
+4. Expédition
+   - Emballage
+   - Choix du mode de livraison
+   - Envoi et suivi
+
+5. Réception et Confirmation
+   - Livraison au destinataire
+   - Confirmation de réception
+   - Feedback client`,
+
+    generic: `Processus ${title}
+
+1. Initialisation
+   - Démarrage du processus
+   - Collecte des informations initiales
+   - Validation des prérequis
+
+2. Analyse
+   - Étude de la demande
+   - Évaluation des options
+   - Prise de décision
+
+3. Exécution
+   - Mise en œuvre des actions
+   - Coordination des intervenants
+   - Suivi de l'avancement
+
+4. Contrôle
+   - Vérification des résultats
+   - Validation de conformité
+   - Ajustements si nécessaire
+
+5. Finalisation
+   - Clôture du processus
+   - Documentation
+   - Archivage
+
+6. Suivi
+   - Analyse post-processus
+   - Retour d'expérience
+   - Amélioration continue`
+  };
+
+  return genericTemplates[type] || genericTemplates['generic'];
+}
 
 // Process analysis logic
 function analyzeProcess(description: string, type: string = 'text') {

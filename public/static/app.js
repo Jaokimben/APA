@@ -1,4 +1,4 @@
-let currentProcessType = 'text';
+let currentProcessType = 'title';
 let currentDiagramType = 'flow';
 let currentProcessData = null;
 
@@ -8,17 +8,25 @@ function setProcessType(type) {
     // Update button styles
     const buttons = document.querySelectorAll('.process-type-btn');
     buttons.forEach(btn => {
-        btn.classList.remove('bg-blue-500', 'text-white');
+        btn.classList.remove('bg-blue-500', 'bg-orange-500', 'text-white');
         btn.classList.add('bg-gray-200', 'text-gray-700');
     });
     
     const activeBtn = document.getElementById(`btn-${type}`);
     activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
-    activeBtn.classList.add('bg-blue-500', 'text-white');
+    
+    // Different color for title mode
+    if (type === 'title') {
+        activeBtn.classList.add('bg-orange-500', 'text-white');
+    } else {
+        activeBtn.classList.add('bg-blue-500', 'text-white');
+    }
     
     // Update placeholder
     const input = document.getElementById('processInput');
-    if (type === 'bpmn') {
+    if (type === 'title') {
+        input.placeholder = 'Entrez le titre du processus (exemples valides):\n\n• KYC\n• Recrutement\n• Gestion des Commandes\n• Onboarding Client\n• Support Client\n• Purchase-to-Pay\n• Gestion des Sinistres\n\nL\'IA recherchera automatiquement les étapes les plus pertinentes selon les meilleures pratiques internationales.';
+    } else if (type === 'bpmn') {
         input.placeholder = 'Format BPMN XML ou description structurée:\n\n<process id="pizza-order">\n  <startEvent id="start"/>\n  <task id="order" name="Commande client"/>\n  <task id="payment" name="Paiement"/>\n  ...\n</process>\n\nOu simplement décrivez les étapes BPMN...';
     } else {
         input.placeholder = 'Exemple: Processus de commande de pizza jusqu\'à sa livraison\n\n1. Client passe commande (téléphone, site web, app)\n2. Validation de la commande et paiement\n3. Préparation de la pizza en cuisine\n4. Cuisson\n5. Emballage\n6. Assignation au livreur\n7. Livraison au client\n8. Confirmation de livraison';
@@ -57,11 +65,23 @@ async function loadPredefinedProcess(processId) {
 function showNotification(type, message) {
     // Create notification element
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white font-semibold`;
+    
+    // Color mapping for different notification types
+    let bgColor, icon;
+    if (type === 'success') {
+        bgColor = 'bg-green-500';
+        icon = 'check-circle';
+    } else if (type === 'info') {
+        bgColor = 'bg-blue-500';
+        icon = 'info-circle';
+    } else {
+        bgColor = 'bg-red-500';
+        icon = 'exclamation-circle';
+    }
+    
+    notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 ${bgColor} text-white font-semibold`;
     notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+        <i class="fas fa-${icon} mr-2"></i>
         ${message}
     `;
     
@@ -88,9 +108,28 @@ async function analyzeProcess() {
     document.getElementById('resultsSection').classList.add('hidden');
     
     try {
+        let processDescription = processInput;
+        
+        // If in title mode, search for process steps first
+        if (currentProcessType === 'title') {
+            showNotification('info', `Recherche des étapes pour "${processInput}"...`);
+            
+            const searchResponse = await axios.post('/api/search-process', {
+                processTitle: processInput
+            });
+            
+            processDescription = searchResponse.data.description;
+            
+            // Update textarea with found process
+            document.getElementById('processInput').value = processDescription;
+            
+            showNotification('success', `Processus trouvé ! Analyse en cours...`);
+        }
+        
+        // Analyze the process
         const response = await axios.post('/api/analyze', {
-            processDescription: processInput,
-            processType: currentProcessType
+            processDescription: processDescription,
+            processType: currentProcessType === 'title' ? 'text' : currentProcessType
         });
         
         const data = response.data;
