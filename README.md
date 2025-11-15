@@ -49,7 +49,13 @@ L'application fournit également des **recommandations stratégiques** pour dép
      - 🟣 **IA Agentique LLM** (agents autonomes, génération, raisonnement)
      - ⚪ **Manuel avec support IA** (IoT, vision par ordinateur, AR)
 
-3. **Visualisations riches**
+3. **Visualisation graphique des processus** ⭐ NOUVEAU
+   - **Diagramme de flux** : Visualisation séquentielle avec code couleur par niveau
+   - **Swimlanes par niveau** : Regroupement des étapes par type d'automatisation
+   - Rendu interactif avec Mermaid.js
+   - Export possible (screenshot ou intégration)
+
+4. **Visualisations analytiques riches**
    - Statistiques d'automatisation en temps réel (3 niveaux)
    - Analyse détaillée étape par étape avec:
      - Type d'automatisation et sous-type
@@ -59,7 +65,7 @@ L'application fournit également des **recommandations stratégiques** pour dép
    - Vue comparative des 3 niveaux avec caractéristiques techniques
    - Recommandations stratégiques priorisées par phases (court, moyen, long terme)
 
-4. **API Backend robuste**
+5. **API Backend robuste**
    - Endpoint `/api/analyze` pour analyse de processus
    - Support CORS pour intégrations tierces
    - Gestion d'erreurs complète
@@ -165,10 +171,11 @@ webapp/
 4. **Cliquez sur "Analyser avec l'IA Agentique"**
 5. **Consultez les résultats**:
    - Vue d'ensemble du processus
-   - Statistiques d'automatisation
-   - Analyse détaillée par étape
-   - Comparaison Digitalisation vs IA
-   - Recommandations stratégiques
+   - **🎨 Visualisation graphique** (Flux de processus ou Swimlanes)
+   - Statistiques d'automatisation par niveau
+   - Analyse détaillée par étape avec technologies
+   - Comparaison des 3 niveaux d'automatisation
+   - Recommandations stratégiques priorisées
 
 ### Exemple de processus
 ```
@@ -234,6 +241,7 @@ wrangler pages deploy dist --project-name agentic-process-analyzer
 ## 🎨 Caractéristiques distinctives
 
 - **Approche 3 niveaux unique**: Distinction claire entre Règles, IA Déterministe et IA Agentique LLM
+- **Visualisation graphique avancée**: Diagrammes de flux interactifs avec code couleur par niveau d'automatisation
 - **Analyse technique précise**: Technologies recommandées, effort d'implémentation et ROI par niveau
 - **Vision stratégique progressive**: Déploiement par phases (Quick Wins → ML → LLM)
 - **Recommandations actionnables**: Roadmap d'implémentation avec priorisation claire
