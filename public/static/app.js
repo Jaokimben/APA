@@ -25,6 +25,56 @@ function setProcessType(type) {
     }
 }
 
+async function loadPredefinedProcess(processId) {
+    try {
+        // Show loading
+        const input = document.getElementById('processInput');
+        input.value = 'Chargement du processus...';
+        input.disabled = true;
+        
+        // Fetch predefined process
+        const response = await axios.get(`/api/process/${processId}`);
+        const template = response.data;
+        
+        // Load into textarea
+        input.value = template.description;
+        input.disabled = false;
+        
+        // Scroll to textarea
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Show success message
+        showNotification('success', `Processus "${template.name}" chargé avec succès !`);
+        
+    } catch (error) {
+        console.error('Error loading predefined process:', error);
+        document.getElementById('processInput').value = '';
+        document.getElementById('processInput').disabled = false;
+        showNotification('error', 'Erreur lors du chargement du processus pré-défini.');
+    }
+}
+
+function showNotification(type, message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white font-semibold`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 async function analyzeProcess() {
     const processInput = document.getElementById('processInput').value.trim();
     

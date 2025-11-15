@@ -10,6 +10,137 @@ app.use('/api/*', cors())
 // Serve static files
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// Predefined process templates
+const processTemplates = {
+  'kyc-aml': {
+    name: 'Processus KYC/AML (Know Your Customer)',
+    description: `Processus complet de vérification d'identité client et conformité anti-blanchiment selon les standards internationaux 2024
+
+Sources: Thomson Reuters Legal, Fenergo, ComplyCube, FATF Guidelines
+
+1. Initial Documentation (Programme d'Identification Client - CIP)
+Collecte des informations et documents d'identité de base du client
+   - Collecte des informations personnelles (nom, prénom, date de naissance, adresse)
+   - Vérification de l'identité via documents officiels (passeport, carte d'identité, permis de conduire)
+   - Capture de photo/selfie pour comparaison biométrique
+   - Vérification de l'adresse (justificatif de domicile < 3 mois)
+   - Collecte des informations professionnelles (employeur, source de revenus)
+   - Signature numérique et consentement RGPD
+
+2. Third-Party Verification (Vérification Tierce)
+Vérification de l'authenticité des documents et des informations via bases de données externes
+   - Vérification des documents d'identité auprès des autorités émettrices
+   - Validation biométrique (reconnaissance faciale, liveness detection)
+   - Vérification contre les listes de sanctions (OFAC, UN, EU)
+   - Screening PEP (Politically Exposed Persons)
+   - Contrôle des médias négatifs (adverse media screening)
+   - Vérification de l'adresse via bases de données publiques
+   - Validation du numéro de téléphone et email
+
+3. Secure Data Storage (Stockage Sécurisé des Données)
+Stockage conforme et sécurisé des données client avec chiffrement
+   - Chiffrement des données sensibles (AES-256)
+   - Stockage dans des bases de données sécurisées (ISO 27001)
+   - Mise en place des contrôles d'accès basés sur les rôles (RBAC)
+   - Journalisation de tous les accès (audit trail)
+   - Backup automatique et redondance géographique
+   - Respect des obligations de conservation (5-10 ans selon juridiction)
+   - Conformité RGPD : droit à l'oubli, portabilité
+
+4. Ongoing Monitoring (Surveillance Continue)
+Surveillance continue des transactions et du comportement client
+   - Monitoring en temps réel des transactions
+   - Détection d'anomalies via machine learning
+   - Alertes automatiques sur transactions inhabituelles
+   - Vérification périodique des changements de statut PEP
+   - Re-screening régulier contre les listes de sanctions
+   - Analyse des patterns de transactions (velocity checks)
+   - Surveillance des changements d'adresse ou coordonnées
+
+5. Risk Assessment and Profiling (Évaluation et Profilage des Risques)
+Classification du niveau de risque client et ajustement des mesures de vigilance
+   - Calcul du score de risque client (risk scoring)
+   - Classification : Low Risk / Medium Risk / High Risk
+   - Évaluation des facteurs de risque géographique
+   - Analyse du type de produits/services utilisés
+   - Évaluation du volume et fréquence des transactions
+   - Due Diligence Simplifiée (SDD) pour clients low-risk
+   - Due Diligence Renforcée (EDD) pour clients high-risk
+   - Révision périodique du profil de risque (annuel/trimestriel)
+
+6. Compliance with AML Regulations (Conformité Réglementaire AML)
+Garantir la conformité continue avec les réglementations anti-blanchiment
+   - Génération de rapports de transactions suspectes (STR/SAR)
+   - Déclaration TRACFIN (France) ou FinCEN (USA)
+   - Reporting régulier aux autorités de régulation
+   - Audit interne des procédures KYC/AML
+   - Formation continue des équipes sur les nouvelles réglementations
+   - Mise à jour des politiques et procédures
+   - Documentation complète pour audits externes`
+  },
+  'customer-onboarding': {
+    name: 'Onboarding Client Digital (Banque/Fintech)',
+    description: `Processus complet d'ouverture de compte et onboarding digital pour services financiers
+
+1. Pré-qualification et Éligibilité
+   - Questionnaire de pré-qualification (âge, résidence, nationalité)
+   - Vérification de l'éligibilité géographique
+   - Sélection du type de compte/produit
+   - Présentation des conditions générales
+
+2. Vérification d'Identité (e-KYC)
+   - Capture photo du document d'identité
+   - Selfie vidéo avec liveness detection
+   - Vérification biométrique
+   - Contrôle anti-fraude documentaire`
+  },
+  'purchase-to-pay': {
+    name: 'Processus Purchase-to-Pay (P2P)',
+    description: `Processus complet d'achat et paiement fournisseurs
+
+1. Demande d'achat
+   - Expression du besoin par le demandeur
+   - Création de la demande d'achat
+   - Validation hiérarchique
+
+2. Création de commande
+   - Sélection du fournisseur
+   - Négociation des conditions
+   - Génération du bon de commande
+
+3. Réception des biens/services
+   - Contrôle de la livraison
+   - Validation de la conformité
+   - Enregistrement de la réception
+
+4. Traitement de la facture
+   - Réception de la facture fournisseur
+   - Rapprochement 3-way match
+   - Validation et approbation
+
+5. Paiement
+   - Planification du paiement
+   - Exécution du virement
+   - Archivage et comptabilisation`
+  }
+};
+
+// API route to get predefined process
+app.get('/api/process/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const template = processTemplates[id as keyof typeof processTemplates]
+    
+    if (!template) {
+      return c.json({ error: 'Process template not found' }, 404)
+    }
+    
+    return c.json(template)
+  } catch (error) {
+    return c.json({ error: 'Error loading process template' }, 500)
+  }
+})
+
 // API route for process analysis
 app.post('/api/analyze', async (c) => {
   try {
@@ -143,6 +274,30 @@ app.get('/', (c) => {
                         <button onclick="setProcessType('bpmn')" id="btn-bpmn" 
                                 class="process-type-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold">
                             <i class="fas fa-diagram-project mr-2"></i>Format BPMN
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-book-open text-indigo-500 mr-2"></i>
+                        Ou choisissez un processus pré-défini
+                    </label>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Processus documentés selon les meilleures pratiques internationales
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="loadPredefinedProcess('kyc-aml')" 
+                                class="px-3 py-2 rounded-lg bg-white border-2 border-indigo-300 text-gray-700 hover:bg-indigo-100 text-sm font-medium transition">
+                            <i class="fas fa-shield-alt mr-1"></i>KYC/AML Compliance
+                        </button>
+                        <button onclick="loadPredefinedProcess('customer-onboarding')" 
+                                class="px-3 py-2 rounded-lg bg-white border-2 border-indigo-300 text-gray-700 hover:bg-indigo-100 text-sm font-medium transition">
+                            <i class="fas fa-user-plus mr-1"></i>Onboarding Client
+                        </button>
+                        <button onclick="loadPredefinedProcess('purchase-to-pay')" 
+                                class="px-3 py-2 rounded-lg bg-white border-2 border-indigo-300 text-gray-700 hover:bg-indigo-100 text-sm font-medium transition">
+                            <i class="fas fa-shopping-cart mr-1"></i>Purchase-to-Pay
                         </button>
                     </div>
                 </div>
