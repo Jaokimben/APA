@@ -39,6 +39,7 @@ L'application fournit également des **recommandations stratégiques** pour dép
 1. **Interface utilisateur intuitive**
    - Design moderne avec TailwindCSS et animations
    - Support multi-format (description textuelle + BPMN)
+   - **Processus pré-définis** avec un clic (KYC/AML, Onboarding, P2P) ⭐ NOUVEAU
    - Interface responsive et accessible
 
 2. **Analyse intelligente des processus**
