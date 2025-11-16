@@ -4,6 +4,58 @@ Toutes les modifications notables du projet sont documentées dans ce fichier.
 
 ---
 
+## [1.4.0] - 2025-11-15 - Upload d'Images BPMN 🖼️
+
+### ✨ Nouveautés Majeures
+- **Upload d'Images de Processus en Mode BPMN**
+  - Interface d'upload drag-and-drop élégante
+  - Support PNG, JPG, JPEG (max 5MB)
+  - Prévisualisation de l'image avec option de suppression
+  - Conversion automatique en base64
+  
+- **Endpoint API `/api/analyze-image`**
+  - Accepte les images en base64
+  - Prêt pour intégration Vision AI (GPT-4V, Claude Vision, Google Cloud Vision)
+  - Réponse simulée pour développement
+  - Documentation complète pour production
+
+- **Switch Intelligent d'Interface**
+  - Mode Titre → Zone de texte (orange)
+  - Mode Description → Zone de texte (bleu)  
+  - Mode BPMN → Upload d'image (bleu)
+  - Transitions fluides entre les modes
+
+### 📚 Documentation
+- Ajout de `VISION_AI_INTEGRATION.md` (12.5 KB)
+  - Guide complet d'intégration de 4 services Vision AI
+  - Exemples de code pour chaque service
+  - Comparaison des coûts et performances
+  - Best practices de production
+  - FAQ détaillée
+
+### 🎨 Interface Utilisateur
+- Zone d'upload avec icône cloud élégante
+- Prévisualisation responsive de l'image
+- Bouton de suppression avec confirmation visuelle
+- Messages d'état clairs (max taille, formats acceptés)
+- Design cohérent avec le reste de l'application
+
+### 🔧 Technique
+- Validation côté client (type, taille)
+- Gestion base64 optimisée
+- Gestion d'erreurs robuste
+- Prêt pour Vision AI : GPT-4V, Claude Vision, Google Cloud Vision, AWS Rekognition
+
+### 🎯 Roadmap Production
+Pour activer l'analyse d'image réelle :
+1. Choisir un service Vision AI (voir `VISION_AI_INTEGRATION.md`)
+2. Obtenir les clés API
+3. Configurer les secrets Cloudflare
+4. Remplacer l'endpoint simulé
+5. Déployer
+
+---
+
 ## [1.3.0] - 2025-11-15 - Recherche par Titre de Processus 🔍
 
 ### ✨ Nouveautés Majeures
