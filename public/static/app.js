@@ -1,6 +1,7 @@
 let currentProcessType = 'title';
 let currentDiagramType = 'flow';
 let currentProcessData = null;
+let uploadedImageBase64 = null;
 
 function setProcessType(type) {
     currentProcessType = type;
@@ -22,14 +23,25 @@ function setProcessType(type) {
         activeBtn.classList.add('bg-blue-500', 'text-white');
     }
     
-    // Update placeholder
+    // Update UI based on mode
+    const inputContainer = document.getElementById('processInputContainer');
+    const uploadContainer = document.getElementById('imageUploadContainer');
     const input = document.getElementById('processInput');
-    if (type === 'title') {
-        input.placeholder = 'Entrez le titre du processus (exemples valides):\n\n• KYC\n• Recrutement\n• Gestion des Commandes\n• Onboarding Client\n• Support Client\n• Purchase-to-Pay\n• Gestion des Sinistres\n\nL\'IA recherchera automatiquement les étapes les plus pertinentes selon les meilleures pratiques internationales.';
-    } else if (type === 'bpmn') {
-        input.placeholder = 'Format BPMN XML ou description structurée:\n\n<process id="pizza-order">\n  <startEvent id="start"/>\n  <task id="order" name="Commande client"/>\n  <task id="payment" name="Paiement"/>\n  ...\n</process>\n\nOu simplement décrivez les étapes BPMN...';
+    
+    if (type === 'bpmn') {
+        // Show image upload option for BPMN
+        inputContainer.classList.add('hidden');
+        uploadContainer.classList.remove('hidden');
     } else {
-        input.placeholder = 'Exemple: Processus de commande de pizza jusqu\'à sa livraison\n\n1. Client passe commande (téléphone, site web, app)\n2. Validation de la commande et paiement\n3. Préparation de la pizza en cuisine\n4. Cuisson\n5. Emballage\n6. Assignation au livreur\n7. Livraison au client\n8. Confirmation de livraison';
+        // Show text input for other modes
+        inputContainer.classList.remove('hidden');
+        uploadContainer.classList.add('hidden');
+        
+        if (type === 'title') {
+            input.placeholder = 'Entrez le titre du processus (exemples valides):\n\n• KYC\n• Recrutement\n• Gestion des Commandes\n• Onboarding Client\n• Support Client\n• Purchase-to-Pay\n• Gestion des Sinistres\n\nL\'IA recherchera automatiquement les étapes les plus pertinentes selon les meilleures pratiques internationales.';
+        } else {
+            input.placeholder = 'Exemple: Processus de commande de pizza jusqu\'à sa livraison\n\n1. Client passe commande (téléphone, site web, app)\n2. Validation de la commande et paiement\n3. Préparation de la pizza en cuisine\n4. Cuisson\n5. Emballage\n6. Assignation au livreur\n7. Livraison au client\n8. Confirmation de livraison';
+        }
     }
 }
 
@@ -95,12 +107,56 @@ function showNotification(type, message) {
     }, 3000);
 }
 
-async function analyzeProcess() {
-    const processInput = document.getElementById('processInput').value.trim();
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
     
-    if (!processInput) {
-        alert('Veuillez décrire votre processus avant l\'analyse.');
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Veuillez sélectionner une image valide (PNG, JPG, JPEG).');
         return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('L\'image est trop grande. Taille maximale: 5MB.');
+        return;
+    }
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        uploadedImageBase64 = e.target.result;
+        document.getElementById('imagePreview').src = e.target.result;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+        document.getElementById('uploadPlaceholder').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    uploadedImageBase64 = null;
+    document.getElementById('imagePreview').src = '';
+    document.getElementById('imagePreviewContainer').classList.add('hidden');
+    document.getElementById('uploadPlaceholder').classList.remove('hidden');
+    document.getElementById('imageUpload').value = '';
+}
+
+async function analyzeProcess() {
+    let processInput = '';
+    
+    // Check if we have input based on current mode
+    if (currentProcessType === 'bpmn') {
+        if (!uploadedImageBase64) {
+            alert('Veuillez uploader une image du processus BPMN.');
+            return;
+        }
+    } else {
+        processInput = document.getElementById('processInput').value.trim();
+        if (!processInput) {
+            alert('Veuillez décrire votre processus avant l\'analyse.');
+            return;
+        }
     }
     
     // Show loading
@@ -110,8 +166,19 @@ async function analyzeProcess() {
     try {
         let processDescription = processInput;
         
-        // If in title mode, search for process steps first
-        if (currentProcessType === 'title') {
+        // Handle BPMN image mode
+        if (currentProcessType === 'bpmn' && uploadedImageBase64) {
+            showNotification('info', 'Analyse de l\'image en cours...');
+            
+            const imageResponse = await axios.post('/api/analyze-image', {
+                image: uploadedImageBase64
+            });
+            
+            processDescription = imageResponse.data.description;
+            showNotification('success', 'Image analysée ! Analyse du processus...');
+        }
+        // Handle title search mode
+        else if (currentProcessType === 'title') {
             showNotification('info', `Recherche des étapes pour "${processInput}"...`);
             
             const searchResponse = await axios.post('/api/search-process', {
@@ -129,7 +196,7 @@ async function analyzeProcess() {
         // Analyze the process
         const response = await axios.post('/api/analyze', {
             processDescription: processDescription,
-            processType: currentProcessType === 'title' ? 'text' : currentProcessType
+            processType: 'text' // Always use text mode for analysis
         });
         
         const data = response.data;
@@ -144,7 +211,8 @@ async function analyzeProcess() {
         
     } catch (error) {
         console.error('Error:', error);
-        alert('Erreur lors de l\'analyse. Veuillez réessayer.');
+        const errorMessage = error.response?.data?.error || 'Erreur lors de l\'analyse. Veuillez réessayer.';
+        alert(errorMessage);
         document.getElementById('loadingSpinner').classList.add('hidden');
     }
 }

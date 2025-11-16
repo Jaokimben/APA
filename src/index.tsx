@@ -163,6 +163,84 @@ app.post('/api/search-process', async (c) => {
   }
 })
 
+// API route to analyze BPMN process image
+app.post('/api/analyze-image', async (c) => {
+  try {
+    const { image } = await c.req.json()
+    
+    if (!image) {
+      return c.json({ error: 'Image is required' }, 400)
+    }
+
+    // Extract base64 data (remove data:image/...;base64, prefix if present)
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+    
+    // For now, we provide a simulated response
+    // In production, integrate with an OCR/Vision AI service:
+    // - Google Cloud Vision API (OCR + text detection)
+    // - AWS Rekognition (text extraction)
+    // - Azure Computer Vision (OCR)
+    // - Anthropic Claude Vision (image understanding)
+    // - OpenAI GPT-4 Vision (diagram interpretation)
+    
+    const simulatedDescription = `Processus Extrait de l'Image BPMN
+
+ℹ️ Note: Analyse d'image simulée actuellement.
+
+Pour activer l'analyse d'image réelle, vous pouvez intégrer:
+• Google Cloud Vision API - OCR et détection de texte
+• OpenAI GPT-4 Vision - Compréhension de diagrammes
+• Anthropic Claude Vision - Analyse d'images complexes
+• AWS Rekognition - Extraction de texte
+• Azure Computer Vision - OCR multilingue
+
+Exemple de processus extrait (à titre de démonstration):
+
+1. Démarrage du Processus
+   - Réception de la demande initiale
+   - Validation des prérequis
+   - Création du dossier
+
+2. Collecte et Validation des Données
+   - Saisie des informations requises
+   - Validation des champs obligatoires
+   - Vérification de la conformité
+
+3. Traitement Automatisé
+   - Analyse des données
+   - Application des règles métier
+   - Calculs et vérifications
+
+4. Révision et Approbation
+   - Contrôle qualité manuel
+   - Validation par un superviseur
+   - Ajustements si nécessaire
+
+5. Finalisation
+   - Génération des documents
+   - Notification des parties prenantes
+   - Mise à jour des systèmes
+
+6. Archivage et Suivi
+   - Stockage sécurisé des documents
+   - Indexation pour recherche future
+   - Suivi des indicateurs de performance
+
+💡 Astuce: En attendant l'intégration d'un service d'IA vision, utilisez:
+   • Mode "Titre du Processus" pour les processus standards (KYC, Recrutement, etc.)
+   • Mode "Description Textuelle" pour décrire manuellement votre processus`
+
+    return c.json({
+      description: simulatedDescription,
+      source: 'Simulated analysis - Vision AI integration needed for production',
+      imageSize: base64Data.length,
+      note: 'This is a placeholder response. Integrate a Vision AI service for real image analysis.'
+    })
+  } catch (error) {
+    return c.json({ error: 'Error analyzing image. Please try another mode.' }, 500)
+  }
+})
+
 // API route for process analysis
 app.post('/api/analyze', async (c) => {
   try {
@@ -332,7 +410,8 @@ app.get('/', (c) => {
                     </div>
                 </div>
 
-                <div class="mb-4">
+                <!-- Text Input Container -->
+                <div id="processInputContainer" class="mb-4">
                     <label for="processInput" class="block text-gray-700 font-semibold mb-2">
                         Description du Processus
                     </label>
@@ -342,6 +421,51 @@ app.get('/', (c) => {
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Exemple: Processus de commande de pizza jusqu'à sa livraison&#10;&#10;1. Client passe commande (téléphone, site web, app)&#10;2. Validation de la commande et paiement&#10;3. Préparation de la pizza en cuisine&#10;4. Cuisson&#10;5. Emballage&#10;6. Assignation au livreur&#10;7. Livraison au client&#10;8. Confirmation de livraison"
                     ></textarea>
+                </div>
+                
+                <!-- Image Upload Container (for BPMN mode) -->
+                <div id="imageUploadContainer" class="mb-4 hidden">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-image text-blue-500 mr-2"></i>
+                        Image du Processus BPMN
+                    </label>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Uploadez une image de votre diagramme BPMN (PNG, JPG, JPEG). L'IA analysera automatiquement le processus.
+                    </p>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition">
+                        <input 
+                            type="file" 
+                            id="imageUpload" 
+                            accept="image/png,image/jpeg,image/jpg"
+                            onchange="handleImageUpload(event)"
+                            class="hidden"
+                        />
+                        
+                        <!-- Upload Placeholder -->
+                        <div id="uploadPlaceholder" class="text-center cursor-pointer" onclick="document.getElementById('imageUpload').click()">
+                            <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-600 font-semibold mb-2">Cliquez pour sélectionner une image</p>
+                            <p class="text-sm text-gray-500">ou glissez-déposez votre fichier ici</p>
+                            <p class="text-xs text-gray-400 mt-2">PNG, JPG ou JPEG (max 5MB)</p>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="hidden">
+                            <div class="relative">
+                                <img id="imagePreview" src="" alt="Preview" class="max-w-full max-h-96 mx-auto rounded-lg shadow-md"/>
+                                <button 
+                                    onclick="removeImage()" 
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition shadow-lg">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="text-center text-sm text-gray-600 mt-3">
+                                <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                Image prête pour l'analyse
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <button 
