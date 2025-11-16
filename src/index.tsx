@@ -163,7 +163,7 @@ app.post('/api/search-process', async (c) => {
   }
 })
 
-// API route to analyze BPMN process image
+// API route to analyze BPMN process image with Anthropic Claude Vision
 app.post('/api/analyze-image', async (c) => {
   try {
     const { image } = await c.req.json()
@@ -172,47 +172,165 @@ app.post('/api/analyze-image', async (c) => {
       return c.json({ error: 'Image is required' }, 400)
     }
 
-    // Extract base64 data (remove data:image/...;base64, prefix if present)
-    const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+    // Extract base64 data and media type
+    const base64Match = image.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (!base64Match) {
+      return c.json({ error: 'Invalid image format. Expected base64 encoded image.' }, 400)
+    }
     
-    // For now, we provide a simulated response
-    // In production, integrate with an OCR/Vision AI service:
-    // - Google Cloud Vision API (OCR + text detection)
-    // - AWS Rekognition (text extraction)
-    // - Azure Computer Vision (OCR)
-    // - Anthropic Claude Vision (image understanding)
-    // - OpenAI GPT-4 Vision (diagram interpretation)
+    const mediaType = base64Match[1] // png, jpeg, jpg, etc.
+    const base64Data = base64Match[2]
     
-    const simulatedDescription = `Processus Extrait de l'Image BPMN
+    // Determine correct media type for Anthropic API
+    let anthropicMediaType = 'image/png'
+    if (mediaType === 'jpeg' || mediaType === 'jpg') {
+      anthropicMediaType = 'image/jpeg'
+    } else if (mediaType === 'webp') {
+      anthropicMediaType = 'image/webp'
+    } else if (mediaType === 'gif') {
+      anthropicMediaType = 'image/gif'
+    }
 
-ℹ️ Note: Analyse d'image simulée actuellement.
+    // Check if API key is configured
+    const apiKey = c.env?.ANTHROPIC_API_KEY
+    if (!apiKey) {
+      // Fallback to simulated response if no API key
+      return c.json({
+        description: generateFallbackProcessDescription(),
+        source: 'Simulated analysis - ANTHROPIC_API_KEY not configured',
+        note: 'Configure ANTHROPIC_API_KEY secret in Cloudflare to enable real image analysis.',
+        setup: 'Run: npx wrangler secret put ANTHROPIC_API_KEY --project-name agentic-process-analyzer'
+      })
+    }
 
-Pour activer l'analyse d'image réelle, vous pouvez intégrer:
-• Google Cloud Vision API - OCR et détection de texte
-• OpenAI GPT-4 Vision - Compréhension de diagrammes
-• Anthropic Claude Vision - Analyse d'images complexes
-• AWS Rekognition - Extraction de texte
-• Azure Computer Vision - OCR multilingue
+    // Call Anthropic Claude Vision API
+    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 2000,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: anthropicMediaType,
+                  data: base64Data
+                }
+              },
+              {
+                type: 'text',
+                text: `Analysez attentivement ce diagramme BPMN ou ce schéma de processus métier.
 
-Exemple de processus extrait (à titre de démonstration):
+Votre mission :
+1. Identifiez TOUTES les étapes visibles dans le diagramme
+2. Comprenez la logique et l'ordre du processus
+3. Extrayez chaque activité, décision, et sous-processus
+
+Format de sortie EXACT requis :
+
+Processus [Nom du processus identifié]
+
+1. [Nom de la première étape]
+   - [Description détaillée ou sous-étapes si visibles]
+   - [Actions spécifiques]
+
+2. [Nom de la deuxième étape]
+   - [Description détaillée ou sous-étapes si visibles]
+   - [Actions spécifiques]
+
+3. [Continue pour toutes les étapes...]
+
+IMPORTANT :
+- Soyez exhaustif : incluez TOUTES les étapes visibles
+- Respectez l'ordre séquentiel du diagramme
+- Si vous voyez des décisions (losanges), mentionnez-les comme étapes de décision
+- Si vous voyez des sous-processus ou parallélismes, décrivez-les clairement
+- Utilisez un français professionnel clair
+- Ne commentez pas sur la qualité du diagramme, concentrez-vous sur l'extraction
+
+Commencez l'analyse maintenant :`
+              }
+            ]
+          }
+        ]
+      })
+    })
+
+    if (!claudeResponse.ok) {
+      const errorData = await claudeResponse.text()
+      console.error('Claude API error:', errorData)
+      
+      // Fallback to simulated response
+      return c.json({
+        description: generateFallbackProcessDescription(),
+        source: 'Simulated analysis - Claude API error',
+        error: `API returned ${claudeResponse.status}`,
+        note: 'Using fallback response due to API error'
+      })
+    }
+
+    const result = await claudeResponse.json()
+    const processDescription = result.content?.[0]?.text || generateFallbackProcessDescription()
+
+    return c.json({
+      description: processDescription,
+      source: 'Extracted from image using Anthropic Claude 3.5 Sonnet',
+      model: 'claude-3-5-sonnet-20241022',
+      imageSize: base64Data.length
+    })
+  } catch (error) {
+    console.error('Image analysis error:', error)
+    
+    // Fallback to simulated response
+    return c.json({
+      description: generateFallbackProcessDescription(),
+      source: 'Simulated analysis - Error occurred',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      note: 'Using fallback response due to error'
+    })
+  }
+})
+
+// Helper function to generate fallback process description
+function generateFallbackProcessDescription(): string {
+  return `Processus Extrait de l'Image
+
+⚠️ Note: Analyse simulée (API Claude Vision non configurée ou erreur)
+
+Pour activer l'analyse d'image réelle :
+1. Obtenez une clé API Anthropic : https://console.anthropic.com/
+2. Configurez le secret Cloudflare :
+   npx wrangler secret put ANTHROPIC_API_KEY --project-name agentic-process-analyzer
+3. Redéployez l'application
+
+Exemple de processus (démonstration) :
 
 1. Démarrage du Processus
    - Réception de la demande initiale
    - Validation des prérequis
    - Création du dossier
 
-2. Collecte et Validation des Données
-   - Saisie des informations requises
+2. Collecte des Informations
+   - Saisie des données requises
    - Validation des champs obligatoires
    - Vérification de la conformité
 
-3. Traitement Automatisé
-   - Analyse des données
+3. Traitement et Analyse
+   - Analyse automatisée des données
    - Application des règles métier
    - Calculs et vérifications
 
-4. Révision et Approbation
-   - Contrôle qualité manuel
+4. Validation et Approbation
+   - Contrôle qualité
    - Validation par un superviseur
    - Ajustements si nécessaire
 
@@ -221,25 +339,15 @@ Exemple de processus extrait (à titre de démonstration):
    - Notification des parties prenantes
    - Mise à jour des systèmes
 
-6. Archivage et Suivi
-   - Stockage sécurisé des documents
+6. Archivage
+   - Stockage sécurisé
    - Indexation pour recherche future
-   - Suivi des indicateurs de performance
+   - Suivi des KPIs
 
-💡 Astuce: En attendant l'intégration d'un service d'IA vision, utilisez:
-   • Mode "Titre du Processus" pour les processus standards (KYC, Recrutement, etc.)
-   • Mode "Description Textuelle" pour décrire manuellement votre processus`
-
-    return c.json({
-      description: simulatedDescription,
-      source: 'Simulated analysis - Vision AI integration needed for production',
-      imageSize: base64Data.length,
-      note: 'This is a placeholder response. Integrate a Vision AI service for real image analysis.'
-    })
-  } catch (error) {
-    return c.json({ error: 'Error analyzing image. Please try another mode.' }, 500)
-  }
-})
+💡 En attendant, utilisez :
+   • Mode "Titre du Processus" pour les processus standards
+   • Mode "Description Textuelle" pour décrire manuellement`
+}
 
 // API route for process analysis
 app.post('/api/analyze', async (c) => {
