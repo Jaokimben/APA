@@ -490,7 +490,7 @@ app.get('/', (c) => {
                     </div>
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
-                        <strong>Titre du Processus</strong> : Indiquez juste le nom (ex: "KYC", "Recrutement", "Gestion des Commandes") et l'IA trouvera les étapes automatiquement
+                        <strong>Titre</strong> : Nom du processus (ex: "KYC") • <strong>Texte</strong> : Description étape par étape • <strong>BPMN</strong> : XML standard ou description structurée
                     </p>
                 </div>
 
@@ -519,7 +519,7 @@ app.get('/', (c) => {
                 </div>
 
                 <!-- Text Input Container -->
-                <div id="processInputContainer" class="mb-4">
+                <div class="mb-4">
                     <label for="processInput" class="block text-gray-700 font-semibold mb-2">
                         Description du Processus
                     </label>
@@ -529,51 +529,6 @@ app.get('/', (c) => {
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Exemple: Processus de commande de pizza jusqu'à sa livraison&#10;&#10;1. Client passe commande (téléphone, site web, app)&#10;2. Validation de la commande et paiement&#10;3. Préparation de la pizza en cuisine&#10;4. Cuisson&#10;5. Emballage&#10;6. Assignation au livreur&#10;7. Livraison au client&#10;8. Confirmation de livraison"
                     ></textarea>
-                </div>
-                
-                <!-- Image Upload Container (for BPMN mode) -->
-                <div id="imageUploadContainer" class="mb-4 hidden">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-image text-blue-500 mr-2"></i>
-                        Image du Processus BPMN
-                    </label>
-                    <p class="text-sm text-gray-600 mb-3">
-                        Uploadez une image de votre diagramme BPMN (PNG, JPG, JPEG). L'IA analysera automatiquement le processus.
-                    </p>
-                    
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition">
-                        <input 
-                            type="file" 
-                            id="imageUpload" 
-                            accept="image/png,image/jpeg,image/jpg"
-                            onchange="handleImageUpload(event)"
-                            class="hidden"
-                        />
-                        
-                        <!-- Upload Placeholder -->
-                        <div id="uploadPlaceholder" class="text-center cursor-pointer" onclick="document.getElementById('imageUpload').click()">
-                            <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-3"></i>
-                            <p class="text-gray-600 font-semibold mb-2">Cliquez pour sélectionner une image</p>
-                            <p class="text-sm text-gray-500">ou glissez-déposez votre fichier ici</p>
-                            <p class="text-xs text-gray-400 mt-2">PNG, JPG ou JPEG (max 5MB)</p>
-                        </div>
-                        
-                        <!-- Image Preview -->
-                        <div id="imagePreviewContainer" class="hidden">
-                            <div class="relative">
-                                <img id="imagePreview" src="" alt="Preview" class="max-w-full max-h-96 mx-auto rounded-lg shadow-md"/>
-                                <button 
-                                    onclick="removeImage()" 
-                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition shadow-lg">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <p class="text-center text-sm text-gray-600 mt-3">
-                                <i class="fas fa-check-circle text-green-500 mr-1"></i>
-                                Image prête pour l'analyse
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 <button 
