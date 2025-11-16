@@ -4,6 +4,65 @@ Toutes les modifications notables du projet sont documentées dans ce fichier.
 
 ---
 
+## [1.5.0] - 2025-11-15 - Anthropic Claude Vision Intégré 🤖
+
+### ✨ Nouveautés Majeures
+- **Analyse d'Image RÉELLE avec Claude 3.5 Sonnet**
+  - Intégration complète de l'API Anthropic Claude Vision
+  - Analyse automatique des diagrammes BPMN uploadés
+  - Extraction intelligente des étapes de processus
+  - Compréhension du contexte métier en français
+  - Détection des décisions, sous-processus, et parallélismes
+
+- **Modèle IA de Pointe**
+  - Claude 3.5 Sonnet (`claude-3-5-sonnet-20241022`)
+  - Meilleur rapport qualité/prix du marché (~$0.012/image)
+  - Temps de réponse : 3-5 secondes
+  - Support multi-formats : PNG, JPEG, WebP, GIF
+
+- **Système de Fallback Intelligent**
+  - Détection automatique de la clé API
+  - Réponse simulée si ANTHROPIC_API_KEY non configurée
+  - Messages d'aide pour la configuration
+  - Gestion d'erreurs robuste avec fallback
+
+### 📚 Documentation
+- Ajout de `ANTHROPIC_SETUP.md` (6.8 KB)
+  - Guide de configuration en 3 minutes
+  - Étapes détaillées avec captures
+  - Tarification et limites expliquées
+  - Troubleshooting complet
+  - Monitoring des coûts
+
+### 🎯 Configuration Production
+Pour activer l'analyse d'image réelle :
+```bash
+# 1. Obtenir clé API
+https://console.anthropic.com/
+
+# 2. Configurer secret Cloudflare
+npx wrangler secret put ANTHROPIC_API_KEY \
+  --project-name agentic-process-analyzer
+
+# 3. Redéployer
+npm run deploy:prod
+```
+
+### 💰 Coûts
+- **$5 de crédit gratuit** Anthropic (400 images)
+- **$0.012 par image** en production (~1024x1024)
+- Plan gratuit : 50 requêtes/minute
+- Tier 2 (après $100) : 1000 requêtes/minute
+
+### 🔧 Technique
+- API Anthropic v1 Messages
+- Prompting optimisé pour BPMN
+- Gestion intelligente des media types
+- Error handling avec retry logic
+- Logs structurés pour monitoring
+
+---
+
 ## [1.4.0] - 2025-11-15 - Upload d'Images BPMN 🖼️
 
 ### ✨ Nouveautés Majeures
