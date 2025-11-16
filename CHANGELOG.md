@@ -4,6 +4,48 @@ Toutes les modifications notables du projet sont documentées dans ce fichier.
 
 ---
 
+## [1.6.0] - 2025-11-15 - Retour au Mode BPMN Texte 📝
+
+### 🔄 Changements Majeurs
+- **Suppression de l'Upload d'Images**
+  - Retrait de la fonctionnalité d'upload d'images en mode BPMN
+  - Retour à un input texte cohérent avec les autres modes
+  - Interface simplifiée et uniforme
+
+- **Mode BPMN Texte Restauré**
+  - Input texte pour XML BPMN standard
+  - Support de la description structurée BPMN
+  - Placeholder avec exemple XML
+  - Même expérience utilisateur que les modes Titre et Description
+
+### 🗑️ Supprimé
+- Interface d'upload d'images drag-and-drop
+- Fonctions `handleImageUpload()` et `removeImage()`
+- Variable `uploadedImageBase64`
+- Section HTML `imageUploadContainer`
+- Logique d'analyse d'image dans `analyzeProcess()`
+- Endpoint `/api/analyze-image` (conservé mais non utilisé)
+
+### ✨ Améliorations
+- Interface plus simple et cohérente
+- 3 modes homogènes : Titre, Description, BPMN
+- Tous utilisent la même zone de texte
+- Texte d'aide mis à jour et clarifié
+- Meilleure expérience utilisateur
+
+### 📋 Modes Disponibles
+1. **Titre du Processus** (🟠) : Entrez le nom, l'IA trouve les étapes
+2. **Description Textuelle** (🔵) : Décrivez étape par étape
+3. **Format BPMN** (🔵) : XML BPMN ou description structurée
+
+### 🎯 Rationale
+- Simplicité : Interface uniforme plus facile à utiliser
+- Performance : Pas besoin de gérer les uploads d'images
+- Cohérence : Même interaction pour tous les modes
+- Coût : Pas de frais API pour l'analyse d'images
+
+---
+
 ## [1.5.0] - 2025-11-15 - Anthropic Claude Vision Intégré 🤖
 
 ### ✨ Nouveautés Majeures
